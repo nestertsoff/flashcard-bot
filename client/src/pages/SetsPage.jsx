@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import { api } from '../api';
-import LangSwitcher from '../components/LangSwitcher';
-import ThemeToggle from '../components/ThemeToggle';
+import SettingsDropdown from '../components/SettingsDropdown';
 
 export default function SetsPage() {
   const { logout } = useAuth();
@@ -46,13 +45,7 @@ export default function SetsPage() {
     <div className="container">
       <div className="header">
         <h1>{t.mySets}</h1>
-        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-          <LangSwitcher />
-          <ThemeToggle />
-          <button className="lang-btn" onClick={logout} aria-label={t.logout} title={t.logout}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          </button>
-        </div>
+        <SettingsDropdown onLogout={logout} />
       </div>
 
       <div className="btn-row">

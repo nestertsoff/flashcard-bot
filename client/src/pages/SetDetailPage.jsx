@@ -62,8 +62,13 @@ export default function SetDetailPage() {
   }
 
   async function handleShare() {
-    const { code } = await api.shareSet(id);
-    setShareCode(code);
+    try {
+      const { code } = await api.shareSet(id);
+      setShareCode(code);
+      try { await navigator.clipboard.writeText(code); } catch {}
+    } catch (err) {
+      console.error('Share failed:', err);
+    }
   }
 
   async function handleDeleteSet() {
