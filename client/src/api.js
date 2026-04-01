@@ -1,10 +1,13 @@
 async function request(method, path, body) {
   const opts = {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {},
     credentials: 'include',
   };
-  if (body) opts.body = JSON.stringify(body);
+  if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
   const res = await fetch(path, opts);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
