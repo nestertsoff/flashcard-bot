@@ -10,6 +10,7 @@ import SetsPage from './pages/SetsPage';
 import SetDetailPage from './pages/SetDetailPage';
 import FlashcardPage from './pages/FlashcardPage';
 import TestPage from './pages/TestPage';
+import ShareImportPage from './pages/ShareImportPage';
 import './index.css';
 
 function ProtectedRoute({ children }) {
@@ -34,6 +35,7 @@ function App() {
           <Route path="/sets/:id" element={<ProtectedRoute><SetDetailPage /></ProtectedRoute>} />
           <Route path="/sets/:id/flashcard" element={<ProtectedRoute><FlashcardPage /></ProtectedRoute>} />
           <Route path="/sets/:id/test" element={<ProtectedRoute><TestPage /></ProtectedRoute>} />
+          <Route path="/share/:code" element={<ProtectedRoute><ShareImportPage /></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
     </LangProvider>
