@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import { api } from '../api';
 import { getCorrectSticker, getWrongSticker, getResultSticker, getResultMessage } from '../stickers';
-import { speak, getAutoplay, hasVoice } from '../tts';
+import { speak, getAutoplay } from '../tts';
 import SpeakButton from '../components/SpeakButton';
 
 function sortCards(cards) {
@@ -35,7 +35,7 @@ export default function FlashcardPage() {
       const card = cards[index];
       const frontText = direction === 'word' ? card.word : card.translations.join(', ');
       const frontL = direction === 'word' ? setData.lang : setData.translation_lang;
-      if (hasVoice(frontL)) speak(frontText, frontL);
+      speak(frontText, frontL);
     }
   }, [index, setData, done]);
 
@@ -105,7 +105,7 @@ export default function FlashcardPage() {
           <div className={`flashcard-container ${flipped ? 'flipped' : ''}`} onClick={() => {
             const next = !flipped;
             setFlipped(next);
-            if (next && getAutoplay() && setData && hasVoice(backLang)) speak(back, backLang);
+            if (next && getAutoplay() && setData) speak(back, backLang);
           }}>
             <div className="flashcard-inner">
               <div className="flashcard-front">

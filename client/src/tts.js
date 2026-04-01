@@ -1,51 +1,20 @@
-const LANG_MAP = {
-  en: 'en-US',
-  uk: 'uk-UA',
-  ru: 'ru-RU',
-  tr: 'tr-TR',
-  de: 'de-DE',
-  fr: 'fr-FR',
-  es: 'es-ES',
-  it: 'it-IT',
-  pt: 'pt-PT',
-  pl: 'pl-PL',
-  ja: 'ja-JP',
-  ko: 'ko-KR',
-  zh: 'zh-CN',
-  ar: 'ar-SA',
-  nl: 'nl-NL',
-  sv: 'sv-SE',
-  cs: 'cs-CZ',
-  ro: 'ro-RO',
-  hu: 'hu-HU',
-};
-
-export function hasVoice(langCode) {
-  if (!window.speechSynthesis) return false;
-  const lang = LANG_MAP[langCode] || langCode || 'en-US';
-  const voices = window.speechSynthesis.getVoices();
-  return voices.some(v => v.lang === lang || v.lang.startsWith(lang.split('-')[0]));
-}
+let currentAudio = null;
 
 export function speak(text, langCode) {
-  if (!window.speechSynthesis || !text) return;
-  window.speechSynthesis.cancel();
-  const lang = LANG_MAP[langCode] || langCode || 'en-US';
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 0.9;
-
-  // Try to find a matching voice
-  const voices = window.speechSynthesis.getVoices();
-  const voice = voices.find(v => v.lang === lang)
-    || voices.find(v => v.lang.startsWith(lang.split('-')[0]));
-  if (voice) {
-    utterance.voice = voice;
-    utterance.lang = voice.lang;
-  } else {
-    utterance.lang = lang;
+  if (!text || !langCode) return;
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
   }
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${langCode}&client=tw-ob`;
+  const audio = new Audio(url);
+  audio.playbackRate = 0.9;
+  currentAudio = audio;
+  audio.play().catch(() => {});
+}
 
-  window.speechSynthesis.speak(utterance);
+export function hasVoice() {
+  return true;
 }
 
 export function getAutoplay() {

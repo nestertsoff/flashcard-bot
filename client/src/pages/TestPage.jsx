@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import { api } from '../api';
 import { getCorrectSticker, getWrongSticker, getResultSticker, getResultMessage } from '../stickers';
-import { speak, getAutoplay, hasVoice } from '../tts';
+import { speak, getAutoplay } from '../tts';
 import SpeakButton from '../components/SpeakButton';
 
 function sortCards(cards) {
@@ -51,7 +51,7 @@ export default function TestPage() {
       const card = cards[index];
       const q = direction === 'word' ? card.word : card.translations.join(', ');
       const qLang = direction === 'word' ? setData.lang : setData.translation_lang;
-      if (hasVoice(qLang)) speak(q, qLang);
+      speak(q, qLang);
     }
   }, [index, setData, done]);
 

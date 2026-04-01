@@ -1,19 +1,6 @@
-import { useState, useEffect } from 'react';
-import { speak, hasVoice } from '../tts';
+import { speak } from '../tts';
 
 export default function SpeakButton({ text, lang, size = 18 }) {
-  const [available, setAvailable] = useState(() => hasVoice(lang));
-
-  useEffect(() => {
-    // Voices may load async — recheck when they become available
-    setAvailable(hasVoice(lang));
-    const onVoicesChanged = () => setAvailable(hasVoice(lang));
-    window.speechSynthesis?.addEventListener('voiceschanged', onVoicesChanged);
-    return () => window.speechSynthesis?.removeEventListener('voiceschanged', onVoicesChanged);
-  }, [lang]);
-
-  if (!available) return null;
-
   return (
     <button
       className="speak-btn"
