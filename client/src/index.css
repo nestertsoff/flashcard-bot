@@ -192,8 +192,8 @@ textarea.input { resize: vertical; min-height: 120px; font-family: 'Nunito Mono'
   background: var(--border);
   margin: 8px 0;
 }
-.progress-bar .known { background: linear-gradient(90deg, var(--success), var(--success-hover)); transition: flex 0.5s ease; }
-.progress-bar .learning { background: linear-gradient(90deg, var(--warning), var(--accent-dark)); transition: flex 0.5s ease; }
+.progress-bar .known { background: linear-gradient(90deg, var(--primary), var(--primary-dark)); transition: flex 0.5s ease; }
+.progress-bar .learning { background: linear-gradient(90deg, var(--accent), var(--accent-dark)); transition: flex 0.5s ease; }
 
 .stats { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
 

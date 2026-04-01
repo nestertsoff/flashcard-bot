@@ -85,8 +85,12 @@ export default function SetDetailPage() {
   return (
     <div className="container">
       <div className="header">
-        <button className="btn btn-secondary btn-sm" onClick={() => navigate('/')}>{t.back}</button>
-        <button className="btn btn-danger btn-sm" onClick={handleDeleteSet}>{t.delete}</button>
+        <button className="btn btn-secondary btn-sm" onClick={() => navigate('/')} aria-label={t.back} title={t.back}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button className="btn btn-danger btn-sm" onClick={handleDeleteSet} aria-label={t.delete} title={t.delete}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
       </div>
 
       <h1 style={{ textAlign: 'center', marginBottom: 12 }}>{set.title}</h1>
