@@ -27,6 +27,8 @@ export default function SetDetailPage() {
   const [translation, setTranslation] = useState('');
   const [bulkText, setBulkText] = useState('');
   const [copied, setCopied] = useState(false);
+  const [shareLink, setShareLink] = useState(null);
+  const [shareError, setShareError] = useState(null);
   const [direction, setDirection] = useState('word');
 
   useEffect(() => { loadSet(); }, [id]);
@@ -62,14 +64,30 @@ export default function SetDetailPage() {
   }
 
   async function handleCopyLink() {
+    setShareError(null);
     try {
       const { code } = await api.shareSet(id);
       const url = `${window.location.origin}/share/${code}`;
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setShareLink(url);
+      // Try clipboard — fallback to showing link for manual copy
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      } catch {
+        // Fallback: select text in a temp input
+        const input = document.createElement('input');
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        input.setSelectionRange(0, 99999);
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      }
     } catch (err) {
-      console.error('Copy failed:', err);
+      setShareError(err.message);
     }
   }
 
@@ -94,8 +112,8 @@ export default function SetDetailPage() {
     <div className="container">
       {/* Header */}
       <div className="header">
-        <button className="btn btn-secondary btn-sm" onClick={() => navigate('/')} aria-label={t.back} title={t.back}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <button className="btn btn-secondary btn-icon" onClick={() => navigate('/')} aria-label={t.back} title={t.back}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <h1 style={{ fontSize: 20, margin: 0 }}>{set.title}</h1>
         <div style={{ width: 36 }} />
@@ -248,6 +266,11 @@ export default function SetDetailPage() {
                 <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> {t.copyLink}</>
               )}
             </button>
+            {shareLink && (
+              <input className="input" readOnly value={shareLink} style={{ marginTop: 10, fontSize: 13, textAlign: 'center' }}
+                onClick={e => e.target.select()} />
+            )}
+            {shareError && <p className="error-msg">{shareError}</p>}
           </div>
 
           <div className="card" style={{ cursor: 'default', marginTop: 16, borderColor: 'var(--danger)' }}>
