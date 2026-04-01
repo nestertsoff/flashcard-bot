@@ -47,6 +47,11 @@ const translations = {
     words: 'Words',
     deleteSetConfirm: 'Delete this set?',
 
+    // Tabs
+    study: 'Study',
+    settings: 'Settings',
+    startLearning: 'Add words to start learning!',
+
     // Flashcard & Test
     dontKnow: "Don't know",
     know: 'Know',
@@ -107,6 +112,10 @@ const translations = {
     words: 'Слова',
     deleteSetConfirm: 'Видалити цей набір?',
 
+    study: 'Навчання',
+    settings: 'Налаштування',
+    startLearning: 'Додай слова щоб почати!',
+
     dontKnow: 'Не знаю',
     know: 'Знаю',
     results: 'Результати',
@@ -164,6 +173,10 @@ const translations = {
     fixInvalidLines: 'Исправь неверные строки',
     words: 'Слова',
     deleteSetConfirm: 'Удалить этот набор?',
+
+    study: 'Учёба',
+    settings: 'Настройки',
+    startLearning: 'Добавь слова чтобы начать!',
 
     dontKnow: 'Не знаю',
     know: 'Знаю',

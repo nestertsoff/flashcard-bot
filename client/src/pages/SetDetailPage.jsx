@@ -21,7 +21,8 @@ export default function SetDetailPage() {
   const navigate = useNavigate();
   const { t } = useLang();
   const [set, setSet] = useState(null);
-  const [tab, setTab] = useState('single');
+  const [page, setPage] = useState('study');
+  const [inputMode, setInputMode] = useState('single');
   const [word, setWord] = useState('');
   const [translation, setTranslation] = useState('');
   const [bulkText, setBulkText] = useState('');
@@ -84,106 +85,172 @@ export default function SetDetailPage() {
 
   return (
     <div className="container">
+      {/* Header */}
       <div className="header">
         <button className="btn btn-secondary btn-sm" onClick={() => navigate('/')} aria-label={t.back} title={t.back}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <button className="btn btn-danger btn-sm" onClick={handleDeleteSet} aria-label={t.delete} title={t.delete}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        </button>
+        <h1 style={{ fontSize: 20, margin: 0 }}>{set.title}</h1>
+        <div style={{ width: 36 }} />
       </div>
 
-      <h1 style={{ textAlign: 'center', marginBottom: 12 }}>{set.title}</h1>
-
+      {/* Progress — always visible */}
       {set.cards.length > 0 && (
         <>
           <div className="progress-bar">
             <span className="known" style={{ flex: knownCount / totalCount }}></span>
             <span className="learning" style={{ flex: learningCount / totalCount }}></span>
           </div>
-          <p className="stats" style={{ textAlign: 'center' }}>
+          <p className="stats" style={{ textAlign: 'center', marginBottom: 16 }}>
             {knownCount} {t.known} · {learningCount} {t.learning} · {newCount} {t.new_} · {set.cards.length} {t.total}
           </p>
         </>
       )}
 
-      <div className="direction-toggle">
-        <button className="btn btn-secondary btn-sm btn-block"
-          onClick={() => setDirection(d => d === 'word' ? 'translation' : 'word')}>
-          {direction === 'word' ? t.wordToTranslation : t.translationToWord}
-        </button>
+      {/* Page tabs */}
+      <div className="tabs" style={{ marginBottom: 20 }}>
+        <div className={`tab ${page === 'study' ? 'active' : ''}`} onClick={() => setPage('study')}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, verticalAlign: -2 }}><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          {t.study}
+        </div>
+        <div className={`tab ${page === 'words' ? 'active' : ''}`} onClick={() => setPage('words')}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, verticalAlign: -2 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          {t.words}
+        </div>
+        <div className={`tab ${page === 'settings' ? 'active' : ''}`} onClick={() => setPage('settings')}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, verticalAlign: -2 }}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          {t.settings}
+        </div>
       </div>
 
-      {set.cards.length > 0 && (
-        <div className="btn-row">
-          <button className="btn btn-primary" onClick={() => navigate(`/sets/${id}/flashcard?dir=${direction}`)}>{t.flashcards}</button>
-          <button className="btn btn-primary" onClick={() => navigate(`/sets/${id}/test?dir=${direction}`)}>{t.test}</button>
+      {/* ===== STUDY TAB ===== */}
+      {page === 'study' && (
+        <div style={{ animation: 'fadeIn 0.2s ease' }}>
+          {set.cards.length === 0 ? (
+            <div className="empty-state">
+              <img src="/stickers/5.webp" alt="" />
+              <p>{t.startLearning}</p>
+              <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setPage('words')}>
+                {t.addWords}
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="direction-toggle">
+                <button className="btn btn-secondary btn-sm btn-block"
+                  onClick={() => setDirection(d => d === 'word' ? 'translation' : 'word')}>
+                  {direction === 'word' ? t.wordToTranslation : t.translationToWord}
+                </button>
+              </div>
+
+              <div className="btn-row">
+                <button className="btn btn-primary" onClick={() => navigate(`/sets/${id}/flashcard?dir=${direction}`)}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  {t.flashcards}
+                </button>
+                <button className="btn btn-primary" onClick={() => navigate(`/sets/${id}/test?dir=${direction}`)}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                  {t.test}
+                </button>
+              </div>
+
+              <div style={{ marginTop: 24, textAlign: 'center' }}>
+                <img src="/stickers/8.webp" alt="" style={{ width: 100, opacity: 0.7 }} />
+              </div>
+            </>
+          )}
         </div>
       )}
 
-      <div className="btn-row">
-        <button className="btn btn-secondary" onClick={handleShare}>{t.share}</button>
-      </div>
-      {shareCode && <div className="share-code">{shareCode}</div>}
-
-      <h2 style={{ margin: '20px 0 12px' }}>{t.addWords}</h2>
-      <div className="tabs">
-        <div className={`tab ${tab === 'single' ? 'active' : ''}`} onClick={() => setTab('single')}>{t.single}</div>
-        <div className={`tab ${tab === 'bulk' ? 'active' : ''}`} onClick={() => setTab('bulk')}>{t.bulk}</div>
-      </div>
-
-      {tab === 'single' && (
-        <div>
-          <div className="form-group">
-            <input className="input" placeholder={t.word} value={word} onChange={e => setWord(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && document.getElementById('trans-input')?.focus()} />
+      {/* ===== WORDS TAB ===== */}
+      {page === 'words' && (
+        <div style={{ animation: 'fadeIn 0.2s ease' }}>
+          <h2 style={{ marginBottom: 12 }}>{t.addWords}</h2>
+          <div className="tabs" style={{ marginBottom: 16 }}>
+            <div className={`tab ${inputMode === 'single' ? 'active' : ''}`} onClick={() => setInputMode('single')}>{t.single}</div>
+            <div className={`tab ${inputMode === 'bulk' ? 'active' : ''}`} onClick={() => setInputMode('bulk')}>{t.bulk}</div>
           </div>
-          <div className="form-group">
-            <input id="trans-input" className="input" placeholder={t.translationsPlaceholder}
-              value={translation} onChange={e => setTranslation(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleAddSingle()} />
-          </div>
-          <button className="btn btn-primary btn-block" onClick={handleAddSingle}>{t.add}</button>
-        </div>
-      )}
 
-      {tab === 'bulk' && (
-        <div>
-          <div className="form-group">
-            <textarea className="input" placeholder={t.bulkPlaceholder}
-              value={bulkText} onChange={e => setBulkText(e.target.value)} rows={6} />
-          </div>
-          {bulkText && (
-            <div style={{ marginBottom: 12 }}>
-              {bulkParsed.map((l, i) => {
-                if (l.empty) return null;
-                return (
-                  <div key={i} className={`bulk-line ${l.valid ? 'valid' : 'invalid'}`}>
-                    <span style={{ fontSize: 13 }}>{l.line}</span>
-                    {!l.valid && <span style={{ fontSize: 12, color: 'var(--danger)', marginLeft: 8 }}>{t.invalidFormat}</span>}
-                  </div>
-                );
-              })}
+          {inputMode === 'single' && (
+            <div>
+              <div className="form-group">
+                <input className="input" placeholder={t.word} value={word} onChange={e => setWord(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && document.getElementById('trans-input')?.focus()} />
+              </div>
+              <div className="form-group">
+                <input id="trans-input" className="input" placeholder={t.translationsPlaceholder}
+                  value={translation} onChange={e => setTranslation(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAddSingle()} />
+              </div>
+              <button className="btn btn-primary btn-block" onClick={handleAddSingle}>{t.add}</button>
             </div>
           )}
-          <button className="btn btn-primary btn-block" onClick={handleAddBulk}
-            disabled={!hasValid || hasInvalid}>
-            {t.addAll}
-          </button>
-          {hasInvalid && <p className="error-msg">{t.fixInvalidLines}</p>}
+
+          {inputMode === 'bulk' && (
+            <div>
+              <div className="form-group">
+                <textarea className="input" placeholder={t.bulkPlaceholder}
+                  value={bulkText} onChange={e => setBulkText(e.target.value)} rows={6} />
+              </div>
+              {bulkText && (
+                <div style={{ marginBottom: 12 }}>
+                  {bulkParsed.map((l, i) => {
+                    if (l.empty) return null;
+                    return (
+                      <div key={i} className={`bulk-line ${l.valid ? 'valid' : 'invalid'}`}>
+                        <span style={{ fontSize: 13 }}>{l.line}</span>
+                        {!l.valid && <span style={{ fontSize: 12, color: 'var(--danger)', marginLeft: 8 }}>{t.invalidFormat}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <button className="btn btn-primary btn-block" onClick={handleAddBulk}
+                disabled={!hasValid || hasInvalid}>
+                {t.addAll}
+              </button>
+              {hasInvalid && <p className="error-msg">{t.fixInvalidLines}</p>}
+            </div>
+          )}
+
+          {set.cards.length > 0 && (
+            <>
+              <h2 style={{ margin: '24px 0 12px' }}>{t.words} ({set.cards.length})</h2>
+              {set.cards.map(c => (
+                <div key={c.id} className="word-item">
+                  <div>
+                    <span className="word">{c.word}</span>
+                    <span className="translation" style={{ marginLeft: 12 }}>{c.translations.join(', ')}</span>
+                  </div>
+                  <button className="delete-btn" onClick={() => handleDeleteCard(c.id)} aria-label={t.delete}>×</button>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
 
-      {set.cards.length > 0 && <h2 style={{ margin: '24px 0 12px' }}>{t.words} ({set.cards.length})</h2>}
-      {set.cards.map(c => (
-        <div key={c.id} className="word-item">
-          <div>
-            <span className="word">{c.word}</span>
-            <span className="translation" style={{ marginLeft: 12 }}>{c.translations.join(', ')}</span>
+      {/* ===== SETTINGS TAB ===== */}
+      {page === 'settings' && (
+        <div style={{ animation: 'fadeIn 0.2s ease' }}>
+          <div className="card" style={{ cursor: 'default' }}>
+            <p style={{ fontWeight: 700, marginBottom: 8 }}>{t.share}</p>
+            <button className="btn btn-secondary btn-block" onClick={handleShare}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              {t.share}
+            </button>
+            {shareCode && <div className="share-code">{shareCode}</div>}
           </div>
-          <button className="delete-btn" onClick={() => handleDeleteCard(c.id)}>×</button>
+
+          <div className="card" style={{ cursor: 'default', marginTop: 16, borderColor: 'var(--danger)' }}>
+            <p style={{ fontWeight: 700, marginBottom: 8, color: 'var(--danger)' }}>{t.delete}</p>
+            <button className="btn btn-danger btn-block" onClick={handleDeleteSet}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              {t.delete}
+            </button>
+          </div>
         </div>
-      ))}
+      )}
     </div>
   );
 }

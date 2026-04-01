@@ -341,13 +341,15 @@ textarea.input { resize: vertical; min-height: 120px; font-family: 'Nunito Mono'
 
 /* Language switcher */
 .lang-switcher {
-  display: flex; gap: 4px; align-items: center;
+  display: flex; gap: 2px; align-items: center;
 }
 .lang-btn {
-  padding: 4px 10px; border: 2px solid var(--border); border-radius: 8px;
-  background: var(--surface); color: var(--text-secondary); font-size: 12px;
+  padding: 0; width: 36px; height: 32px;
+  border: 1.5px solid var(--border); border-radius: 6px;
+  background: var(--surface); color: var(--text-secondary); font-size: 11px;
   font-weight: 700; cursor: pointer; transition: all var(--transition);
   font-family: inherit;
+  display: inline-flex; align-items: center; justify-content: center;
 }
 .lang-btn:hover { border-color: var(--primary); }
 .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary-dark); }

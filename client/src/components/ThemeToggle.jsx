@@ -7,7 +7,6 @@ export default function ThemeToggle() {
       className="lang-btn"
       onClick={toggleTheme}
       aria-label="Toggle theme"
-      style={{ fontSize: 16, padding: '4px 8px' }}
     >
       {theme === 'light' ? '\u263E' : '\u2600'}
     </button>
