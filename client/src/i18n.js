@@ -198,7 +198,7 @@ export function getTranslations(lang) {
 }
 
 export const LANGUAGES = [
-  { code: 'en', label: 'ENG' },
-  { code: 'uk', label: 'UKR' },
-  { code: 'ru', label: 'RUS' },
+  { code: 'en', label: 'EN' },
+  { code: 'uk', label: 'UA' },
+  { code: 'ru', label: 'RU' },
 ];
