@@ -322,10 +322,11 @@ textarea.input { resize: vertical; min-height: 120px; font-family: 'Nunito Mono'
 /* Tabs */
 .tabs { display: flex; gap: 0; margin-bottom: 16px; }
 .tab {
-  flex: 1; padding: 10px; text-align: center; cursor: pointer;
+  flex: 1; padding: 10px; cursor: pointer;
   background: var(--surface); border: 2px solid var(--border);
   color: var(--text-secondary); font-size: 14px; font-weight: 700;
   transition: all var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 4px;
 }
 .tab:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
 .tab:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
