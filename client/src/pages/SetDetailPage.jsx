@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useLang } from '../context/LangContext';
 import { api } from '../api';
 
 function parseBulkLines(text) {
@@ -18,6 +19,7 @@ function parseBulkLines(text) {
 export default function SetDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLang();
   const [set, setSet] = useState(null);
   const [tab, setTab] = useState('single');
   const [word, setWord] = useState('');
@@ -64,17 +66,17 @@ export default function SetDetailPage() {
   }
 
   async function handleDeleteSet() {
-    if (!confirm('Delete this set?')) return;
+    if (!confirm(t.deleteSetConfirm)) return;
     await api.deleteSet(id);
     navigate('/');
   }
 
   if (!set) return <div className="loader-wrap"><div className="loader"></div></div>;
 
-  const known = set.cards.filter(c => c.status === 'known').length;
-  const learning = set.cards.filter(c => c.status === 'learning').length;
-  const newCount = set.cards.length - known - learning;
-  const total = set.cards.length || 1;
+  const knownCount = set.cards.filter(c => c.status === 'known').length;
+  const learningCount = set.cards.filter(c => c.status === 'learning').length;
+  const newCount = set.cards.length - knownCount - learningCount;
+  const totalCount = set.cards.length || 1;
 
   const bulkParsed = parseBulkLines(bulkText);
   const hasInvalid = bulkParsed.some(l => !l.empty && !l.valid);
@@ -83,8 +85,8 @@ export default function SetDetailPage() {
   return (
     <div className="container">
       <div className="header">
-        <button className="btn btn-secondary btn-sm" onClick={() => navigate('/')}>Back</button>
-        <button className="btn btn-danger btn-sm" onClick={handleDeleteSet}>Delete</button>
+        <button className="btn btn-secondary btn-sm" onClick={() => navigate('/')}>{t.back}</button>
+        <button className="btn btn-danger btn-sm" onClick={handleDeleteSet}>{t.delete}</button>
       </div>
 
       <h1 style={{ textAlign: 'center', marginBottom: 12 }}>{set.title}</h1>
@@ -92,11 +94,11 @@ export default function SetDetailPage() {
       {set.cards.length > 0 && (
         <>
           <div className="progress-bar">
-            <span className="known" style={{ flex: known / total }}></span>
-            <span className="learning" style={{ flex: learning / total }}></span>
+            <span className="known" style={{ flex: knownCount / totalCount }}></span>
+            <span className="learning" style={{ flex: learningCount / totalCount }}></span>
           </div>
           <p className="stats" style={{ textAlign: 'center' }}>
-            {known} known · {learning} learning · {newCount} new · {set.cards.length} total
+            {knownCount} {t.known} · {learningCount} {t.learning} · {newCount} {t.new_} · {set.cards.length} {t.total}
           </p>
         </>
       )}
@@ -104,47 +106,47 @@ export default function SetDetailPage() {
       <div className="direction-toggle">
         <button className="btn btn-secondary btn-sm btn-block"
           onClick={() => setDirection(d => d === 'word' ? 'translation' : 'word')}>
-          {direction === 'word' ? 'Word → Translation' : 'Translation → Word'}
+          {direction === 'word' ? t.wordToTranslation : t.translationToWord}
         </button>
       </div>
 
       {set.cards.length > 0 && (
         <div className="btn-row">
-          <button className="btn btn-primary" onClick={() => navigate(`/sets/${id}/flashcard?dir=${direction}`)}>Cards</button>
-          <button className="btn btn-primary" onClick={() => navigate(`/sets/${id}/test?dir=${direction}`)}>Test</button>
+          <button className="btn btn-primary" onClick={() => navigate(`/sets/${id}/flashcard?dir=${direction}`)}>{t.flashcards}</button>
+          <button className="btn btn-primary" onClick={() => navigate(`/sets/${id}/test?dir=${direction}`)}>{t.test}</button>
         </div>
       )}
 
       <div className="btn-row">
-        <button className="btn btn-secondary" onClick={handleShare}>Share</button>
+        <button className="btn btn-secondary" onClick={handleShare}>{t.share}</button>
       </div>
       {shareCode && <div className="share-code">{shareCode}</div>}
 
-      <h2 style={{ margin: '20px 0 12px' }}>Add Words</h2>
+      <h2 style={{ margin: '20px 0 12px' }}>{t.addWords}</h2>
       <div className="tabs">
-        <div className={`tab ${tab === 'single' ? 'active' : ''}`} onClick={() => setTab('single')}>Single</div>
-        <div className={`tab ${tab === 'bulk' ? 'active' : ''}`} onClick={() => setTab('bulk')}>Bulk</div>
+        <div className={`tab ${tab === 'single' ? 'active' : ''}`} onClick={() => setTab('single')}>{t.single}</div>
+        <div className={`tab ${tab === 'bulk' ? 'active' : ''}`} onClick={() => setTab('bulk')}>{t.bulk}</div>
       </div>
 
       {tab === 'single' && (
         <div>
           <div className="form-group">
-            <input className="input" placeholder="Word" value={word} onChange={e => setWord(e.target.value)}
+            <input className="input" placeholder={t.word} value={word} onChange={e => setWord(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && document.getElementById('trans-input')?.focus()} />
           </div>
           <div className="form-group">
-            <input id="trans-input" className="input" placeholder="Translations (comma separated)"
+            <input id="trans-input" className="input" placeholder={t.translationsPlaceholder}
               value={translation} onChange={e => setTranslation(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAddSingle()} />
           </div>
-          <button className="btn btn-primary btn-block" onClick={handleAddSingle}>Add</button>
+          <button className="btn btn-primary btn-block" onClick={handleAddSingle}>{t.add}</button>
         </div>
       )}
 
       {tab === 'bulk' && (
         <div>
           <div className="form-group">
-            <textarea className="input" placeholder={"word1 - translation1, translation2\nword2 - translation1"}
+            <textarea className="input" placeholder={t.bulkPlaceholder}
               value={bulkText} onChange={e => setBulkText(e.target.value)} rows={6} />
           </div>
           {bulkText && (
@@ -154,7 +156,7 @@ export default function SetDetailPage() {
                 return (
                   <div key={i} className={`bulk-line ${l.valid ? 'valid' : 'invalid'}`}>
                     <span style={{ fontSize: 13 }}>{l.line}</span>
-                    {!l.valid && <span style={{ fontSize: 12, color: 'var(--danger)', marginLeft: 8 }}>Invalid format</span>}
+                    {!l.valid && <span style={{ fontSize: 12, color: 'var(--danger)', marginLeft: 8 }}>{t.invalidFormat}</span>}
                   </div>
                 );
               })}
@@ -162,13 +164,13 @@ export default function SetDetailPage() {
           )}
           <button className="btn btn-primary btn-block" onClick={handleAddBulk}
             disabled={!hasValid || hasInvalid}>
-            Add All
+            {t.addAll}
           </button>
-          {hasInvalid && <p className="error-msg">Fix invalid lines before adding</p>}
+          {hasInvalid && <p className="error-msg">{t.fixInvalidLines}</p>}
         </div>
       )}
 
-      {set.cards.length > 0 && <h2 style={{ margin: '24px 0 12px' }}>Words ({set.cards.length})</h2>}
+      {set.cards.length > 0 && <h2 style={{ margin: '24px 0 12px' }}>{t.words} ({set.cards.length})</h2>}
       {set.cards.map(c => (
         <div key={c.id} className="word-item">
           <div>
