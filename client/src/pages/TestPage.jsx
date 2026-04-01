@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import { api } from '../api';
 import { getCorrectSticker, getWrongSticker, getResultSticker, getResultMessage } from '../stickers';
-import { speak, getAutoplay } from '../tts';
+import { speak, getAutoplay, hasVoice } from '../tts';
 import SpeakButton from '../components/SpeakButton';
 
 function sortCards(cards) {
@@ -45,6 +45,16 @@ export default function TestPage() {
     setOptions([correctAnswer, ...wrongAnswers].sort(() => Math.random() - 0.5));
   }, [cards, index, allCards, direction]);
 
+  // Autoplay question when card changes
+  useEffect(() => {
+    if (cards.length > 0 && !done && !answered && setData && getAutoplay()) {
+      const card = cards[index];
+      const q = direction === 'word' ? card.word : card.translations.join(', ');
+      const qLang = direction === 'word' ? setData.lang : setData.translation_lang;
+      if (hasVoice(qLang)) speak(q, qLang);
+    }
+  }, [index, setData, done]);
+
   if (cards.length === 0) return <div className="loader-wrap"><div className="loader"></div></div>;
 
   if (done) {
@@ -77,11 +87,6 @@ export default function TestPage() {
   const question = direction === 'word' ? card.word : card.translations.join(', ');
   const correctAnswer = direction === 'word' ? card.translations.join(', ') : card.word;
   const questionLang = direction === 'word' ? setData?.lang : setData?.translation_lang;
-
-  // Autoplay question when card changes
-  useEffect(() => {
-    if (getAutoplay() && setData && !answered) speak(question, questionLang);
-  }, [index, setData]);
 
   async function handleAnswer(opt) {
     if (answered) return;

@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import { api } from '../api';
 import { getCorrectSticker, getWrongSticker, getResultSticker, getResultMessage } from '../stickers';
-import { speak, getAutoplay } from '../tts';
+import { speak, getAutoplay, hasVoice } from '../tts';
 import SpeakButton from '../components/SpeakButton';
 
 function sortCards(cards) {
@@ -28,6 +28,16 @@ export default function FlashcardPage() {
   useEffect(() => {
     api.getSet(id).then(s => { setSetData(s); setCards(sortCards(s.cards)); });
   }, [id]);
+
+  // Autoplay front when card changes
+  useEffect(() => {
+    if (cards.length > 0 && !done && !sticker && setData && getAutoplay()) {
+      const card = cards[index];
+      const frontText = direction === 'word' ? card.word : card.translations.join(', ');
+      const frontL = direction === 'word' ? setData.lang : setData.translation_lang;
+      if (hasVoice(frontL)) speak(frontText, frontL);
+    }
+  }, [index, setData, done]);
 
   if (cards.length === 0) return <div className="loader-wrap"><div className="loader"></div></div>;
 
@@ -63,11 +73,6 @@ export default function FlashcardPage() {
   const frontLang = direction === 'word' ? setData?.lang : setData?.translation_lang;
   const backLang = direction === 'word' ? setData?.translation_lang : setData?.lang;
 
-  // Autoplay front when card changes
-  useEffect(() => {
-    if (getAutoplay() && setData && !sticker) speak(front, frontLang);
-  }, [index, setData]);
-
   async function answer(correct) {
     await api.updateProgress(card.id, correct ? 'known' : 'learning');
     setSticker(correct ? getCorrectSticker() : getWrongSticker());
@@ -100,7 +105,7 @@ export default function FlashcardPage() {
           <div className={`flashcard-container ${flipped ? 'flipped' : ''}`} onClick={() => {
             const next = !flipped;
             setFlipped(next);
-            if (next && getAutoplay() && setData) speak(back, backLang);
+            if (next && getAutoplay() && setData && hasVoice(backLang)) speak(back, backLang);
           }}>
             <div className="flashcard-inner">
               <div className="flashcard-front">

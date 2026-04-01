@@ -20,12 +20,31 @@ const LANG_MAP = {
   hu: 'hu-HU',
 };
 
+export function hasVoice(langCode) {
+  if (!window.speechSynthesis) return false;
+  const lang = LANG_MAP[langCode] || langCode || 'en-US';
+  const voices = window.speechSynthesis.getVoices();
+  return voices.some(v => v.lang === lang || v.lang.startsWith(lang.split('-')[0]));
+}
+
 export function speak(text, langCode) {
   if (!window.speechSynthesis || !text) return;
   window.speechSynthesis.cancel();
+  const lang = LANG_MAP[langCode] || langCode || 'en-US';
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = LANG_MAP[langCode] || langCode || 'en-US';
   utterance.rate = 0.9;
+
+  // Try to find a matching voice
+  const voices = window.speechSynthesis.getVoices();
+  const voice = voices.find(v => v.lang === lang)
+    || voices.find(v => v.lang.startsWith(lang.split('-')[0]));
+  if (voice) {
+    utterance.voice = voice;
+    utterance.lang = voice.lang;
+  } else {
+    utterance.lang = lang;
+  }
+
   window.speechSynthesis.speak(utterance);
 }
 
