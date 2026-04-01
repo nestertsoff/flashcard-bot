@@ -132,6 +132,36 @@ export function buildServer(db, jwtSecret) {
     return { ok: true };
   });
 
+  // --- TTS ---
+
+  app.get('/api/tts', async (req, reply) => {
+    const { text, lang } = req.query || {};
+    if (!text || !lang) return reply.code(400).send({ error: 'text and lang required' });
+    const apiKey = process.env.GOOGLE_TTS_KEY;
+    if (!apiKey) return reply.code(503).send({ error: 'TTS not configured' });
+
+    const res = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key=' + apiKey, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: { text },
+        voice: { languageCode: lang },
+        audioConfig: { audioEncoding: 'MP3', speakingRate: 0.9 },
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      return reply.code(res.status).send({ error: err });
+    }
+
+    const data = await res.json();
+    const audio = Buffer.from(data.audioContent, 'base64');
+    reply.header('Content-Type', 'audio/mpeg');
+    reply.header('Cache-Control', 'public, max-age=86400');
+    return reply.send(audio);
+  });
+
   // --- SPA FALLBACK ---
 
   app.setNotFoundHandler((req, reply) => {

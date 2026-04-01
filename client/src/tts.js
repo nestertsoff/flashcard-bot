@@ -6,15 +6,10 @@ export function speak(text, langCode) {
     currentAudio.pause();
     currentAudio = null;
   }
-  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${langCode}&client=tw-ob`;
+  const url = `/api/tts?text=${encodeURIComponent(text)}&lang=${encodeURIComponent(langCode)}`;
   const audio = new Audio(url);
-  audio.playbackRate = 0.9;
   currentAudio = audio;
   audio.play().catch(() => {});
-}
-
-export function hasVoice() {
-  return true;
 }
 
 export function getAutoplay() {

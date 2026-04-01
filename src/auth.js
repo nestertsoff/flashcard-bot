@@ -25,8 +25,9 @@ export function verifyToken(token, secret) {
 
 export function authMiddleware(secret, db) {
   return (req, reply, done) => {
-    const skipAuth = ['/api/auth/register', '/api/auth/login', '/api/auth/logout'];
-    if (skipAuth.some(p => req.url === p)) return done();
+    const skipAuth = ['/api/auth/register', '/api/auth/login', '/api/auth/logout', '/api/tts'];
+    const urlPath = req.url.split('?')[0];
+    if (skipAuth.some(p => urlPath === p)) return done();
     if (!req.url.startsWith('/api/')) return done();
 
     const token = req.cookies?.token;

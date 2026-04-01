@@ -7,6 +7,7 @@ services:
       - app-data:/app/data
     environment:
       - JWT_SECRET=${JWT_SECRET}
+      - GOOGLE_TTS_KEY=${GOOGLE_TTS_KEY}
       - DATA_DIR=/app/data
     restart: unless-stopped
 
