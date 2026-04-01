@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import { api } from '../api';
+import { TTS_LANGUAGES } from '../tts';
 import SettingsDropdown from '../components/SettingsDropdown';
 
 export default function SetsPage() {
@@ -15,6 +16,8 @@ export default function SetsPage() {
   const [importError, setImportError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [newTitle, setNewTitle] = useState('');
+  const [newLang, setNewLang] = useState('en');
+  const [newTransLang, setNewTransLang] = useState('uk');
 
   useEffect(() => { loadSets(); }, []);
 
@@ -25,7 +28,7 @@ export default function SetsPage() {
 
   async function handleCreate() {
     if (!newTitle.trim()) return;
-    const set = await api.createSet(newTitle.trim(), []);
+    const set = await api.createSet(newTitle.trim(), [], newLang, newTransLang);
     navigate(`/sets/${set.id}`);
   }
 
@@ -61,6 +64,18 @@ export default function SetsPage() {
               <label>{t.title}</label>
               <input className="input" value={newTitle} onChange={e => setNewTitle(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleCreate()} autoFocus />
+            </div>
+            <div className="form-group">
+              <label>{t.wordLang}</label>
+              <select className="input" value={newLang} onChange={e => setNewLang(e.target.value)}>
+                {TTS_LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>{t.translationLang}</label>
+              <select className="input" value={newTransLang} onChange={e => setNewTransLang(e.target.value)}>
+                {TTS_LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+              </select>
             </div>
             <button className="btn btn-primary btn-block" onClick={handleCreate}>{t.create}</button>
           </div>

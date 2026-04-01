@@ -3,6 +3,8 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import { api } from '../api';
 import { getCorrectSticker, getWrongSticker, getResultSticker, getResultMessage } from '../stickers';
+import { speak, getAutoplay } from '../tts';
+import SpeakButton from '../components/SpeakButton';
 
 function sortCards(cards) {
   const order = { learning: 0, new: 1, known: 2 };
@@ -21,9 +23,10 @@ export default function FlashcardPage() {
   const [results, setResults] = useState([]);
   const [done, setDone] = useState(false);
   const [sticker, setSticker] = useState(null);
+  const [setData, setSetData] = useState(null);
 
   useEffect(() => {
-    api.getSet(id).then(s => setCards(sortCards(s.cards)));
+    api.getSet(id).then(s => { setSetData(s); setCards(sortCards(s.cards)); });
   }, [id]);
 
   if (cards.length === 0) return <div className="loader-wrap"><div className="loader"></div></div>;
@@ -57,6 +60,13 @@ export default function FlashcardPage() {
   const card = cards[index];
   const front = direction === 'word' ? card.word : card.translations.join(', ');
   const back = direction === 'word' ? card.translations.join(', ') : card.word;
+  const frontLang = direction === 'word' ? setData?.lang : setData?.translation_lang;
+  const backLang = direction === 'word' ? setData?.translation_lang : setData?.lang;
+
+  // Autoplay front when card changes
+  useEffect(() => {
+    if (getAutoplay() && setData && !sticker) speak(front, frontLang);
+  }, [index, setData]);
 
   async function answer(correct) {
     await api.updateProgress(card.id, correct ? 'known' : 'learning');
@@ -87,10 +97,20 @@ export default function FlashcardPage() {
       )}
       {!sticker && (
         <>
-          <div className={`flashcard-container ${flipped ? 'flipped' : ''}`} onClick={() => setFlipped(!flipped)}>
+          <div className={`flashcard-container ${flipped ? 'flipped' : ''}`} onClick={() => {
+            const next = !flipped;
+            setFlipped(next);
+            if (next && getAutoplay() && setData) speak(back, backLang);
+          }}>
             <div className="flashcard-inner">
-              <div className="flashcard-front"><span>{front}</span></div>
-              <div className="flashcard-back"><span>{back}</span></div>
+              <div className="flashcard-front">
+                <SpeakButton text={front} lang={frontLang} />
+                <span style={{ margin: '0 8px' }}>{front}</span>
+              </div>
+              <div className="flashcard-back">
+                <SpeakButton text={back} lang={backLang} />
+                <span style={{ margin: '0 8px' }}>{back}</span>
+              </div>
             </div>
           </div>
           {flipped && (

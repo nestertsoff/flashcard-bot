@@ -21,7 +21,7 @@ export const api = {
   me: () => request('GET', '/api/auth/me'),
 
   getSets: () => request('GET', '/api/sets'),
-  createSet: (title, cards) => request('POST', '/api/sets', { title, cards }),
+  createSet: (title, cards, lang, translationLang) => request('POST', '/api/sets', { title, cards, lang, translationLang }),
   getSet: (id) => request('GET', `/api/sets/${id}`),
   deleteSet: (id) => request('DELETE', `/api/sets/${id}`),
   addCard: (setId, word, translations) => request('POST', `/api/sets/${setId}/cards`, { word, translations }),

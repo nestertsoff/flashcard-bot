@@ -3,6 +3,8 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import { api } from '../api';
 import { getCorrectSticker, getWrongSticker, getResultSticker, getResultMessage } from '../stickers';
+import { speak, getAutoplay } from '../tts';
+import SpeakButton from '../components/SpeakButton';
 
 function sortCards(cards) {
   const order = { learning: 0, new: 1, known: 2 };
@@ -24,9 +26,11 @@ export default function TestPage() {
   const [done, setDone] = useState(false);
   const [options, setOptions] = useState([]);
   const [sticker, setSticker] = useState(null);
+  const [setData, setSetData] = useState(null);
 
   useEffect(() => {
     api.getSet(id).then(s => {
+      setSetData(s);
       setAllCards(s.cards);
       setCards(sortCards(s.cards));
     });
@@ -72,6 +76,12 @@ export default function TestPage() {
   const card = cards[index];
   const question = direction === 'word' ? card.word : card.translations.join(', ');
   const correctAnswer = direction === 'word' ? card.translations.join(', ') : card.word;
+  const questionLang = direction === 'word' ? setData?.lang : setData?.translation_lang;
+
+  // Autoplay question when card changes
+  useEffect(() => {
+    if (getAutoplay() && setData && !answered) speak(question, questionLang);
+  }, [index, setData]);
 
   async function handleAnswer(opt) {
     if (answered) return;
@@ -100,7 +110,8 @@ export default function TestPage() {
         <button className="btn btn-secondary btn-icon" onClick={() => navigate(`/sets/${id}`)} aria-label={t.back} title={t.back}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
       </div>
       <div className="counter">{index + 1} / {cards.length}</div>
-      <div style={{ textAlign: 'center', fontSize: 28, fontWeight: 700, padding: 24, background: 'var(--surface)', borderRadius: 'var(--radius)', marginBottom: 20, boxShadow: 'var(--shadow-md)' }}>
+      <div style={{ textAlign: 'center', fontSize: 28, fontWeight: 700, padding: 24, background: 'var(--surface)', borderRadius: 'var(--radius)', marginBottom: 20, boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <SpeakButton text={question} lang={questionLang} />
         {question}
       </div>
       {sticker && (

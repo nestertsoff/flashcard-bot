@@ -17,6 +17,8 @@ export function createDb(dbPath) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL REFERENCES users(id),
       title TEXT NOT NULL,
+      lang TEXT NOT NULL DEFAULT 'en',
+      translation_lang TEXT NOT NULL DEFAULT 'uk',
       share_code TEXT UNIQUE,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -37,6 +39,14 @@ export function createDb(dbPath) {
     );
   `);
 
+  // Migration: add lang columns to existing sets
+  try {
+    sqlite.exec(`ALTER TABLE sets ADD COLUMN lang TEXT NOT NULL DEFAULT 'en'`);
+  } catch {}
+  try {
+    sqlite.exec(`ALTER TABLE sets ADD COLUMN translation_lang TEXT NOT NULL DEFAULT 'uk'`);
+  } catch {}
+
   function createUser(username, hashedPassword) {
     const { lastInsertRowid } = sqlite.prepare(
       'INSERT INTO users (username, password) VALUES (?, ?)'
@@ -52,11 +62,11 @@ export function createDb(dbPath) {
     return sqlite.prepare('SELECT id, username, created_at FROM users WHERE id = ?').get(id) || null;
   }
 
-  function createSet(userId, title, cards) {
+  function createSet(userId, title, cards, lang = 'en', translationLang = 'uk') {
     const insert = sqlite.transaction(() => {
       const { lastInsertRowid } = sqlite.prepare(
-        'INSERT INTO sets (user_id, title) VALUES (?, ?)'
-      ).run(userId, title);
+        'INSERT INTO sets (user_id, title, lang, translation_lang) VALUES (?, ?, ?, ?)'
+      ).run(userId, title, lang, translationLang);
       const setId = Number(lastInsertRowid);
       if (cards && cards.length > 0) {
         const stmt = sqlite.prepare(

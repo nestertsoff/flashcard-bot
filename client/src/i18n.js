@@ -53,6 +53,9 @@ const translations = {
     study: 'Study',
     settings: 'Settings',
     startLearning: 'Add words to start learning!',
+    wordLang: 'Word language',
+    translationLang: 'Translation language',
+    autoplay: 'Auto-pronounce',
 
     // Flashcard & Test
     dontKnow: "Don't know",
@@ -119,6 +122,9 @@ const translations = {
     study: 'Навчання',
     settings: 'Налаштування',
     startLearning: 'Додай слова щоб почати!',
+    wordLang: 'Мова слів',
+    translationLang: 'Мова перекладу',
+    autoplay: 'Автовимова',
 
     dontKnow: 'Не знаю',
     know: 'Знаю',
@@ -183,6 +189,9 @@ const translations = {
     study: 'Учёба',
     settings: 'Настройки',
     startLearning: 'Добавь слова чтобы начать!',
+    wordLang: 'Язык слов',
+    translationLang: 'Язык перевода',
+    autoplay: 'Автопроизношение',
 
     dontKnow: 'Не знаю',
     know: 'Знаю',
@@ -247,6 +256,9 @@ const translations = {
     study: 'Çalış',
     settings: 'Ayarlar',
     startLearning: 'Başlamak için kelime ekle!',
+    wordLang: 'Kelime dili',
+    translationLang: 'Çeviri dili',
+    autoplay: 'Otomatik telaffuz',
 
     dontKnow: 'Bilmiyorum',
     know: 'Biliyorum',

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import { api } from '../api';
+import { getAutoplay, setAutoplay as saveAutoplay } from '../tts';
+import SpeakButton from '../components/SpeakButton';
 
 function parseBulkLines(text) {
   return text.split('\n').map((line, i) => {
@@ -30,6 +32,7 @@ export default function SetDetailPage() {
   const [shareLink, setShareLink] = useState(null);
   const [shareError, setShareError] = useState(null);
   const [direction, setDirection] = useState('word');
+  const [autoplay, setAutoplayState] = useState(getAutoplay);
 
   useEffect(() => { loadSet(); }, [id]);
 
@@ -243,9 +246,12 @@ export default function SetDetailPage() {
               <h2 style={{ margin: '24px 0 12px' }}>{t.words} ({set.cards.length})</h2>
               {set.cards.map(c => (
                 <div key={c.id} className="word-item">
-                  <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, minWidth: 0 }}>
+                    <SpeakButton text={c.word} lang={set.lang} size={16} />
                     <span className="word">{c.word}</span>
-                    <span className="translation" style={{ marginLeft: 12 }}>{c.translations.join(', ')}</span>
+                    <span style={{ color: 'var(--text-secondary)', margin: '0 4px' }}>—</span>
+                    <SpeakButton text={c.translations.join(', ')} lang={set.translation_lang} size={16} />
+                    <span className="translation">{c.translations.join(', ')}</span>
                   </div>
                   <button className="delete-btn" onClick={() => handleDeleteCard(c.id)} aria-label={t.delete}>×</button>
                 </div>
@@ -258,6 +264,12 @@ export default function SetDetailPage() {
       {/* ===== SETTINGS TAB ===== */}
       {page === 'settings' && (
         <div style={{ animation: 'fadeIn 0.2s ease' }}>
+          <div className="toggle-row">
+            <span>{t.autoplay}</span>
+            <button className={`toggle ${autoplay ? 'on' : ''}`}
+              onClick={() => { const v = !autoplay; setAutoplayState(v); saveAutoplay(v); }} />
+          </div>
+
           <div className="card" style={{ cursor: 'default' }}>
             <button className={`btn ${copied ? 'btn-success' : 'btn-secondary'} btn-block`} onClick={handleCopyLink}>
               {copied ? (

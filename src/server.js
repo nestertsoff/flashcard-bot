@@ -80,11 +80,11 @@ export function buildServer(db, jwtSecret) {
   });
 
   app.post('/api/sets', (req) => {
-    const { title, cards } = req.body || {};
+    const { title, cards, lang, translationLang } = req.body || {};
     if (!title || !title.trim()) {
       return { error: 'Title required' };
     }
-    const setId = db.createSet(req.user.id, title.trim(), cards || []);
+    const setId = db.createSet(req.user.id, title.trim(), cards || [], lang || 'en', translationLang || 'uk');
     return db.getSet(setId, req.user.id);
   });
 
