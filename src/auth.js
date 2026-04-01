@@ -1,28 +1,53 @@
-import crypto from 'crypto';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-export function validateInitData(initData, botToken) {
-  if (!initData) return null;
+const SALT_ROUNDS = 10;
+
+export async function hashPassword(password) {
+  return bcrypt.hash(password, SALT_ROUNDS);
+}
+
+export async function comparePassword(password, hash) {
+  return bcrypt.compare(password, hash);
+}
+
+export function signToken(userId, secret) {
+  return jwt.sign({ userId }, secret, { expiresIn: '30d' });
+}
+
+export function verifyToken(token, secret) {
   try {
-    const params = new URLSearchParams(initData);
-    const hash = params.get('hash');
-    if (!hash) return null;
-    params.delete('hash');
-
-    const checkString = [...params.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([k, v]) => `${k}=${v}`)
-      .join('\n');
-
-    const secretKey = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest();
-    const expected = crypto.createHmac('sha256', secretKey).update(checkString).digest('hex');
-
-    if (hash !== expected) return null;
-
-    const userStr = params.get('user');
-    if (!userStr) return null;
-    const user = JSON.parse(userStr);
-    return { id: user.id, username: user.username || '' };
+    return jwt.verify(token, secret);
   } catch {
     return null;
   }
+}
+
+export function authMiddleware(secret, db) {
+  return (req, reply, done) => {
+    const skipAuth = ['/api/auth/register', '/api/auth/login', '/api/auth/logout'];
+    if (skipAuth.some(p => req.url === p)) return done();
+    if (!req.url.startsWith('/api/')) return done();
+
+    const token = req.cookies?.token;
+    if (!token) {
+      reply.code(401).send({ error: 'Unauthorized' });
+      return;
+    }
+
+    const payload = verifyToken(token, secret);
+    if (!payload) {
+      reply.code(401).send({ error: 'Invalid token' });
+      return;
+    }
+
+    const user = db.getUserById(payload.userId);
+    if (!user) {
+      reply.code(401).send({ error: 'User not found' });
+      return;
+    }
+
+    req.user = user;
+    done();
+  };
 }

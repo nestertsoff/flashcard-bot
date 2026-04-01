@@ -8,8 +8,9 @@ export function createDb(dbPath) {
 
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY,
-      username TEXT,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     CREATE TABLE IF NOT EXISTS sets (
@@ -36,15 +37,19 @@ export function createDb(dbPath) {
     );
   `);
 
-  function upsertUser(id, username) {
-    sqlite.prepare(
-      `INSERT INTO users (id, username) VALUES (?, ?)
-       ON CONFLICT(id) DO UPDATE SET username = excluded.username`
-    ).run(id, username);
+  function createUser(username, hashedPassword) {
+    const { lastInsertRowid } = sqlite.prepare(
+      'INSERT INTO users (username, password) VALUES (?, ?)'
+    ).run(username, hashedPassword);
+    return Number(lastInsertRowid);
   }
 
-  function getUser(id) {
-    return sqlite.prepare('SELECT * FROM users WHERE id = ?').get(id) || null;
+  function getUserByUsername(username) {
+    return sqlite.prepare('SELECT * FROM users WHERE username = ?').get(username) || null;
+  }
+
+  function getUserById(id) {
+    return sqlite.prepare('SELECT id, username, created_at FROM users WHERE id = ?').get(id) || null;
   }
 
   function createSet(userId, title, cards) {
@@ -53,11 +58,13 @@ export function createDb(dbPath) {
         'INSERT INTO sets (user_id, title) VALUES (?, ?)'
       ).run(userId, title);
       const setId = Number(lastInsertRowid);
-      const stmt = sqlite.prepare(
-        'INSERT INTO cards (set_id, word, translations) VALUES (?, ?, ?)'
-      );
-      for (const card of cards) {
-        stmt.run(setId, card.word, JSON.stringify(card.translations));
+      if (cards && cards.length > 0) {
+        const stmt = sqlite.prepare(
+          'INSERT INTO cards (set_id, word, translations) VALUES (?, ?, ?)'
+        );
+        for (const card of cards) {
+          stmt.run(setId, card.word, JSON.stringify(card.translations));
+        }
       }
       return setId;
     });
@@ -67,12 +74,16 @@ export function createDb(dbPath) {
   function listSets(userId) {
     return sqlite.prepare(`
       SELECT s.id, s.title, s.share_code, s.created_at,
-             COUNT(c.id) as card_count
-      FROM sets s LEFT JOIN cards c ON c.set_id = s.id
+             COUNT(c.id) as card_count,
+             SUM(CASE WHEN COALESCE(p.status, 'new') = 'known' THEN 1 ELSE 0 END) as known_count,
+             SUM(CASE WHEN COALESCE(p.status, 'new') = 'learning' THEN 1 ELSE 0 END) as learning_count
+      FROM sets s
+      LEFT JOIN cards c ON c.set_id = s.id
+      LEFT JOIN progress p ON p.card_id = c.id AND p.user_id = ?
       WHERE s.user_id = ?
       GROUP BY s.id
-      ORDER BY s.created_at ASC
-    `).all(userId);
+      ORDER BY s.created_at DESC
+    `).all(userId, userId);
   }
 
   function getSet(setId, userId) {
@@ -96,6 +107,21 @@ export function createDb(dbPath) {
     sqlite.prepare('DELETE FROM sets WHERE id = ? AND user_id = ?').run(setId, userId);
   }
 
+  function addCard(setId, userId, word, translations) {
+    const set = sqlite.prepare('SELECT id FROM sets WHERE id = ? AND user_id = ?').get(setId, userId);
+    if (!set) return null;
+    const { lastInsertRowid } = sqlite.prepare(
+      'INSERT INTO cards (set_id, word, translations) VALUES (?, ?, ?)'
+    ).run(setId, word, JSON.stringify(translations));
+    return Number(lastInsertRowid);
+  }
+
+  function deleteCard(cardId, userId) {
+    sqlite.prepare(`
+      DELETE FROM cards WHERE id = ? AND set_id IN (SELECT id FROM sets WHERE user_id = ?)
+    `).run(cardId, userId);
+  }
+
   function generateShareCode(setId, userId) {
     const set = sqlite.prepare('SELECT * FROM sets WHERE id = ? AND user_id = ?').get(setId, userId);
     if (!set) return null;
@@ -116,7 +142,6 @@ export function createDb(dbPath) {
   }
 
   function updateProgress(userId, cardId, status) {
-    const isMistake = status === 'learning';
     sqlite.prepare(`
       INSERT INTO progress (user_id, card_id, status, mistakes, last_seen)
       VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -124,7 +149,7 @@ export function createDb(dbPath) {
         status = excluded.status,
         mistakes = CASE WHEN excluded.status = 'learning' THEN progress.mistakes + 1 ELSE progress.mistakes END,
         last_seen = CURRENT_TIMESTAMP
-    `).run(userId, cardId, status, isMistake ? 1 : 0);
+    `).run(userId, cardId, status, status === 'learning' ? 1 : 0);
   }
 
   function close() {
@@ -132,8 +157,10 @@ export function createDb(dbPath) {
   }
 
   return {
-    upsertUser, getUser, createSet, listSets, getSet,
-    deleteSet, generateShareCode, importByShareCode,
+    createUser, getUserByUsername, getUserById,
+    createSet, listSets, getSet, deleteSet,
+    addCard, deleteCard,
+    generateShareCode, importByShareCode,
     updateProgress, close,
   };
 }

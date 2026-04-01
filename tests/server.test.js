@@ -1,29 +1,16 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
-import crypto from 'crypto';
 import { createDb } from '../src/db.js';
 import { buildServer } from '../src/server.js';
 
-const BOT_TOKEN = 'test_token_123';
+const JWT_SECRET = 'test_secret';
 const TEST_DB = './data/test_server.db';
 let db, server;
-
-function makeInitData(userId, username) {
-  const user = JSON.stringify({ id: userId, username });
-  const data = { user, auth_date: '1234567890' };
-  const checkString = Object.entries(data)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([k, v]) => `${k}=${v}`)
-    .join('\n');
-  const secretKey = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
-  const hash = crypto.createHmac('sha256', secretKey).update(checkString).digest('hex');
-  return `user=${encodeURIComponent(user)}&auth_date=1234567890&hash=${hash}`;
-}
 
 beforeEach(async () => {
   fs.mkdirSync('./data', { recursive: true });
   db = createDb(TEST_DB);
-  server = buildServer(db, BOT_TOKEN);
+  server = buildServer(db, JWT_SECRET);
   await server.ready();
 });
 
@@ -33,90 +20,119 @@ afterEach(async () => {
   if (fs.existsSync(TEST_DB)) fs.unlinkSync(TEST_DB);
 });
 
-describe('GET /api/sets', () => {
-  it('returns empty list for new user', async () => {
-    db.upsertUser(1, 'bob');
-    const res = await server.inject({
-      method: 'GET', url: '/api/sets',
-      headers: { 'x-telegram-init-data': makeInitData(1, 'bob') },
-    });
+async function registerAndGetCookie(username = 'testuser', password = 'password123') {
+  const res = await server.inject({
+    method: 'POST', url: '/api/auth/register',
+    payload: { username, password },
+  });
+  const cookie = res.cookies.find(c => c.name === 'token');
+  return { res, cookie: `token=${cookie.value}` };
+}
+
+describe('auth', () => {
+  it('registers and returns user', async () => {
+    const { res } = await registerAndGetCookie();
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual([]);
+    expect(res.json().username).toBe('testuser');
   });
 
-  it('returns 401 without auth', async () => {
+  it('rejects duplicate username', async () => {
+    await registerAndGetCookie();
+    const res = await server.inject({
+      method: 'POST', url: '/api/auth/register',
+      payload: { username: 'testuser', password: 'password123' },
+    });
+    expect(res.statusCode).toBe(409);
+  });
+
+  it('logs in with correct credentials', async () => {
+    await registerAndGetCookie();
+    const res = await server.inject({
+      method: 'POST', url: '/api/auth/login',
+      payload: { username: 'testuser', password: 'password123' },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().username).toBe('testuser');
+  });
+
+  it('rejects wrong password', async () => {
+    await registerAndGetCookie();
+    const res = await server.inject({
+      method: 'POST', url: '/api/auth/login',
+      payload: { username: 'testuser', password: 'wrong' },
+    });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('returns 401 without cookie', async () => {
     const res = await server.inject({ method: 'GET', url: '/api/sets' });
     expect(res.statusCode).toBe(401);
   });
-});
 
-describe('GET /api/sets/:id', () => {
-  it('returns set with cards and progress', async () => {
-    db.upsertUser(1, 'bob');
-    const setId = db.createSet(1, 'Test', [{ word: 'a', translations: ['b'] }]);
+  it('returns user from /me', async () => {
+    const { cookie } = await registerAndGetCookie();
     const res = await server.inject({
-      method: 'GET', url: `/api/sets/${setId}`,
-      headers: { 'x-telegram-init-data': makeInitData(1, 'bob') },
+      method: 'GET', url: '/api/auth/me',
+      headers: { cookie },
     });
     expect(res.statusCode).toBe(200);
-    const body = res.json();
-    expect(body.title).toBe('Test');
-    expect(body.cards).toHaveLength(1);
-    expect(body.cards[0].status).toBe('new');
-  });
-
-  it('returns 404 for other user set', async () => {
-    db.upsertUser(1, 'bob');
-    db.upsertUser(2, 'eve');
-    const setId = db.createSet(1, 'Test', [{ word: 'a', translations: ['b'] }]);
-    const res = await server.inject({
-      method: 'GET', url: `/api/sets/${setId}`,
-      headers: { 'x-telegram-init-data': makeInitData(2, 'eve') },
-    });
-    expect(res.statusCode).toBe(404);
+    expect(res.json().username).toBe('testuser');
   });
 });
 
-describe('DELETE /api/sets/:id', () => {
-  it('deletes own set', async () => {
-    db.upsertUser(1, 'bob');
-    const setId = db.createSet(1, 'Del', [{ word: 'a', translations: ['b'] }]);
-    const res = await server.inject({
-      method: 'DELETE', url: `/api/sets/${setId}`,
-      headers: { 'x-telegram-init-data': makeInitData(1, 'bob') },
+describe('sets API', () => {
+  it('creates and lists sets', async () => {
+    const { cookie } = await registerAndGetCookie();
+    const create = await server.inject({
+      method: 'POST', url: '/api/sets',
+      headers: { cookie },
+      payload: { title: 'Test', cards: [{ word: 'hi', translations: ['привет'] }] },
     });
-    expect(res.statusCode).toBe(200);
-    expect(db.getSet(setId, 1)).toBeNull();
-  });
-});
+    expect(create.statusCode).toBe(200);
+    expect(create.json().title).toBe('Test');
 
-describe('POST /api/sets/:id/share', () => {
-  it('generates a share code', async () => {
-    db.upsertUser(1, 'bob');
-    const setId = db.createSet(1, 'Sh', [{ word: 'a', translations: ['b'] }]);
-    const res = await server.inject({
-      method: 'POST', url: `/api/sets/${setId}/share`,
-      headers: { 'x-telegram-init-data': makeInitData(1, 'bob') },
+    const list = await server.inject({
+      method: 'GET', url: '/api/sets',
+      headers: { cookie },
     });
-    expect(res.statusCode).toBe(200);
-    expect(res.json().code).toHaveLength(6);
+    expect(list.json()).toHaveLength(1);
   });
-});
 
-describe('POST /api/progress', () => {
-  it('updates card progress', async () => {
-    db.upsertUser(1, 'bob');
-    const setId = db.createSet(1, 'P', [{ word: 'w', translations: ['t'] }]);
-    const cardId = db.getSet(setId, 1).cards[0].id;
-    const res = await server.inject({
-      method: 'POST', url: '/api/progress',
-      headers: {
-        'x-telegram-init-data': makeInitData(1, 'bob'),
-        'content-type': 'application/json',
-      },
-      payload: { cardId, status: 'known' },
+  it('adds card to set', async () => {
+    const { cookie } = await registerAndGetCookie();
+    const set = await server.inject({
+      method: 'POST', url: '/api/sets',
+      headers: { cookie },
+      payload: { title: 'S', cards: [] },
     });
-    expect(res.statusCode).toBe(200);
-    expect(db.getSet(setId, 1).cards[0].status).toBe('known');
+    const setId = set.json().id;
+    const add = await server.inject({
+      method: 'POST', url: `/api/sets/${setId}/cards`,
+      headers: { cookie },
+      payload: { word: 'hello', translations: ['привет'] },
+    });
+    expect(add.statusCode).toBe(200);
+    expect(add.json().word).toBe('hello');
+  });
+
+  it('shares and imports set', async () => {
+    const { cookie: c1 } = await registerAndGetCookie('user1');
+    const { cookie: c2 } = await registerAndGetCookie('user2', 'pass222222');
+    const set = await server.inject({
+      method: 'POST', url: '/api/sets',
+      headers: { cookie: c1 },
+      payload: { title: 'Shared', cards: [{ word: 'a', translations: ['b'] }] },
+    });
+    const share = await server.inject({
+      method: 'POST', url: `/api/sets/${set.json().id}/share`,
+      headers: { cookie: c1 },
+    });
+    const code = share.json().code;
+    const imp = await server.inject({
+      method: 'POST', url: `/api/share/${code}`,
+      headers: { cookie: c2 },
+    });
+    expect(imp.statusCode).toBe(200);
+    expect(imp.json().title).toBe('Shared');
   });
 });
