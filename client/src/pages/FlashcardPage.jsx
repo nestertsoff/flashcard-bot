@@ -37,7 +37,7 @@ export default function FlashcardPage() {
       const frontL = direction === 'word' ? setData.lang : setData.translation_lang;
       speak(frontText, frontL);
     }
-  }, [index, setData, done, sticker]);
+  }, [index, cards, setData, done, sticker]);
 
   if (cards.length === 0) return <div className="loader-wrap"><div className="loader"></div></div>;
 

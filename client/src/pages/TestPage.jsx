@@ -53,7 +53,7 @@ export default function TestPage() {
       const qLang = direction === 'word' ? setData.lang : setData.translation_lang;
       speak(q, qLang);
     }
-  }, [index, setData, done, answered]);
+  }, [index, cards, setData, done, answered]);
 
   if (cards.length === 0) return <div className="loader-wrap"><div className="loader"></div></div>;
 
