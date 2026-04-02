@@ -134,18 +134,28 @@ export function buildServer(db, jwtSecret) {
 
   // --- TTS ---
 
+  const TTS_LANG_MAP = {
+    en: 'en-US', uk: 'uk-UA', ru: 'ru-RU', tr: 'tr-TR',
+    de: 'de-DE', fr: 'fr-FR', es: 'es-ES', it: 'it-IT',
+    pt: 'pt-PT', pl: 'pl-PL', ja: 'ja-JP', ko: 'ko-KR',
+    zh: 'zh-CN', ar: 'ar-SA', nl: 'nl-NL', sv: 'sv-SE',
+    cs: 'cs-CZ', ro: 'ro-RO', hu: 'hu-HU',
+  };
+
   app.get('/api/tts', async (req, reply) => {
     const { text, lang } = req.query || {};
     if (!text || !lang) return reply.code(400).send({ error: 'text and lang required' });
     const apiKey = process.env.GOOGLE_TTS_KEY;
     if (!apiKey) return reply.code(503).send({ error: 'TTS not configured' });
 
+    const languageCode = TTS_LANG_MAP[lang] || lang;
+
     const res = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key=' + apiKey, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         input: { text },
-        voice: { languageCode: lang },
+        voice: { languageCode },
         audioConfig: { audioEncoding: 'MP3', speakingRate: 0.9 },
       }),
     });
