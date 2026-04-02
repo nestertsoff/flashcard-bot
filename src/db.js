@@ -113,6 +113,10 @@ export function createDb(dbPath) {
     };
   }
 
+  function updateSetTitle(setId, userId, title) {
+    sqlite.prepare('UPDATE sets SET title = ? WHERE id = ? AND user_id = ?').run(title, setId, userId);
+  }
+
   function deleteSet(setId, userId) {
     sqlite.prepare('DELETE FROM sets WHERE id = ? AND user_id = ?').run(setId, userId);
   }
@@ -174,7 +178,7 @@ export function createDb(dbPath) {
 
   return {
     createUser, getUserByUsername, getUserById,
-    createSet, listSets, getSet, deleteSet,
+    createSet, listSets, getSet, updateSetTitle, deleteSet,
     addCard, deleteCard,
     generateShareCode, importByShareCode,
     resetProgress, updateProgress, close,

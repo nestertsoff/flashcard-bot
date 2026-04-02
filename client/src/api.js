@@ -23,6 +23,7 @@ export const api = {
   getSets: () => request('GET', '/api/sets'),
   createSet: (title, cards, lang, translationLang) => request('POST', '/api/sets', { title, cards, lang, translationLang }),
   getSet: (id) => request('GET', `/api/sets/${id}`),
+  updateSet: (id, data) => request('PATCH', `/api/sets/${id}`, data),
   deleteSet: (id) => request('DELETE', `/api/sets/${id}`),
   addCard: (setId, word, translations) => request('POST', `/api/sets/${setId}/cards`, { word, translations }),
   deleteCard: (id) => request('DELETE', `/api/cards/${id}`),

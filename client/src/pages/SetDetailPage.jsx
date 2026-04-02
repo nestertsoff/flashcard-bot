@@ -33,6 +33,8 @@ export default function SetDetailPage() {
   const [shareError, setShareError] = useState(null);
   const [direction, setDirection] = useState('word');
   const [autoplay, setAutoplayState] = useState(getAutoplay);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('');
 
   useEffect(() => { loadSet(); }, [id]);
 
@@ -120,7 +122,26 @@ export default function SetDetailPage() {
         <button className="btn btn-secondary btn-icon" onClick={() => navigate('/')} aria-label={t.back} title={t.back}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <h1 style={{ fontSize: 20, margin: 0 }}>{set.title}</h1>
+        {editingTitle ? (
+          <input
+            className="input"
+            value={titleDraft}
+            onChange={e => setTitleDraft(e.target.value)}
+            onBlur={async () => {
+              const trimmed = titleDraft.trim();
+              if (trimmed && trimmed !== set.title) {
+                await api.updateSet(id, { title: trimmed });
+                loadSet();
+              }
+              setEditingTitle(false);
+            }}
+            onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') setEditingTitle(false); }}
+            autoFocus
+            style={{ fontSize: 18, fontWeight: 800, textAlign: 'center', padding: '4px 8px', flex: 1, minWidth: 0 }}
+          />
+        ) : (
+          <h1 style={{ fontSize: 20, margin: 0, cursor: 'pointer' }} onClick={() => { setTitleDraft(set.title); setEditingTitle(true); }}>{set.title}</h1>
+        )}
         <div style={{ width: 36 }} />
       </div>
 

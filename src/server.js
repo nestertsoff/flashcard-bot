@@ -101,6 +101,13 @@ export function buildServer(db, jwtSecret) {
     return set;
   });
 
+  app.patch('/api/sets/:id', (req, reply) => {
+    const { title } = req.body || {};
+    if (!title || !title.trim()) return reply.code(400).send({ error: 'Title required' });
+    db.updateSetTitle(Number(req.params.id), req.user.id, title.trim());
+    return { ok: true };
+  });
+
   app.delete('/api/sets/:id', (req) => {
     db.deleteSet(Number(req.params.id), req.user.id);
     return { ok: true };
