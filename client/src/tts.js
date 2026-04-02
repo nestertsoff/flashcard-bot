@@ -13,7 +13,8 @@ export function speak(text, langCode) {
 }
 
 export function getAutoplay() {
-  return localStorage.getItem('autoplay') === 'true';
+  const val = localStorage.getItem('autoplay');
+  return val === null ? true : val === 'true';
 }
 
 export function setAutoplay(val) {
