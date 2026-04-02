@@ -26,7 +26,7 @@ export default function FlashcardPage() {
   const [setData, setSetData] = useState(null);
 
   useEffect(() => {
-    api.getSet(id).then(s => { setSetData(s); setCards(sortCards(s.cards)); });
+    api.getSet(id).then(s => { setSetData(s); setCards(sortCards(s.cards)); }).catch(() => navigate('/'));
   }, [id]);
 
   // Autoplay front when card changes

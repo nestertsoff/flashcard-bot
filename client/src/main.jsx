@@ -36,6 +36,7 @@ function App() {
           <Route path="/sets/:id/flashcard" element={<ProtectedRoute><FlashcardPage /></ProtectedRoute>} />
           <Route path="/sets/:id/test" element={<ProtectedRoute><TestPage /></ProtectedRoute>} />
           <Route path="/share/:code" element={<ProtectedRoute><ShareImportPage /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </AuthProvider>
     </LangProvider>

@@ -37,8 +37,10 @@ export default function SetDetailPage() {
   useEffect(() => { loadSet(); }, [id]);
 
   async function loadSet() {
-    const data = await api.getSet(id);
-    setSet(data);
+    try {
+      const data = await api.getSet(id);
+      setSet(data);
+    } catch { navigate('/'); }
   }
 
   async function handleAddSingle() {

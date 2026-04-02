@@ -33,7 +33,7 @@ export default function TestPage() {
       setSetData(s);
       setAllCards(s.cards);
       setCards(sortCards(s.cards));
-    });
+    }).catch(() => navigate('/'));
   }, [id]);
 
   useEffect(() => {
