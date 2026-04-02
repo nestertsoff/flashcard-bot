@@ -17,6 +17,13 @@ export function buildServer(db, jwtSecret) {
     root: path.join(__dirname, '..', 'client', 'dist'),
     prefix: '/',
     wildcard: false,
+    setHeaders(reply, filePath) {
+      if (filePath.endsWith('.html')) {
+        reply.setHeader('Cache-Control', 'no-cache');
+      } else {
+        reply.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    },
   });
 
   app.decorateRequest('user', null);
@@ -178,6 +185,7 @@ export function buildServer(db, jwtSecret) {
     if (req.url.startsWith('/api/')) {
       return reply.code(404).send({ error: 'Not found' });
     }
+    reply.header('Cache-Control', 'no-cache');
     return reply.sendFile('index.html');
   });
 
