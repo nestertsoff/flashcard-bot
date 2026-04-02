@@ -37,7 +37,7 @@ export default function FlashcardPage() {
       const frontL = direction === 'word' ? setData.lang : setData.translation_lang;
       speak(frontText, frontL);
     }
-  }, [index, setData, done]);
+  }, [index, setData, done, sticker]);
 
   if (cards.length === 0) return <div className="loader-wrap"><div className="loader"></div></div>;
 
@@ -105,7 +105,6 @@ export default function FlashcardPage() {
           <div className={`flashcard-container ${flipped ? 'flipped' : ''}`} onClick={() => {
             const next = !flipped;
             setFlipped(next);
-            if (next && getAutoplay() && setData) speak(back, backLang);
           }}>
             <div className="flashcard-inner">
               <div className="flashcard-front">
