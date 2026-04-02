@@ -148,7 +148,7 @@ export function createDb(dbPath) {
     return createSet(userId, source.title, cards.map(c => ({
       word: c.word,
       translations: JSON.parse(c.translations),
-    })));
+    })), source.lang, source.translation_lang);
   }
 
   function updateProgress(userId, cardId, status) {
