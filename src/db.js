@@ -151,6 +151,12 @@ export function createDb(dbPath) {
     })), source.lang, source.translation_lang);
   }
 
+  function resetProgress(setId, userId) {
+    sqlite.prepare(`
+      DELETE FROM progress WHERE user_id = ? AND card_id IN (SELECT id FROM cards WHERE set_id = ?)
+    `).run(userId, setId);
+  }
+
   function updateProgress(userId, cardId, status) {
     sqlite.prepare(`
       INSERT INTO progress (user_id, card_id, status, mistakes, last_seen)
@@ -171,6 +177,6 @@ export function createDb(dbPath) {
     createSet, listSets, getSet, deleteSet,
     addCard, deleteCard,
     generateShareCode, importByShareCode,
-    updateProgress, close,
+    resetProgress, updateProgress, close,
   };
 }

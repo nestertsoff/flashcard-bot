@@ -133,6 +133,11 @@ export function buildServer(db, jwtSecret) {
     return db.getSet(newSetId, req.user.id);
   });
 
+  app.post('/api/sets/:id/reset-progress', (req) => {
+    db.resetProgress(Number(req.params.id), req.user.id);
+    return { ok: true };
+  });
+
   app.post('/api/progress', (req) => {
     const { cardId, status } = req.body || {};
     db.updateProgress(req.user.id, cardId, status);

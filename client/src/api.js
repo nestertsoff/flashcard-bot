@@ -28,5 +28,6 @@ export const api = {
   deleteCard: (id) => request('DELETE', `/api/cards/${id}`),
   shareSet: (id) => request('POST', `/api/sets/${id}/share`),
   importSet: (code) => request('POST', `/api/share/${code}`),
+  resetProgress: (setId) => request('POST', `/api/sets/${setId}/reset-progress`),
   updateProgress: (cardId, status) => request('POST', '/api/progress', { cardId, status }),
 };

@@ -56,6 +56,8 @@ const translations = {
     wordLang: 'Word language',
     translationLang: 'Translation language',
     autoplay: 'Auto-pronounce',
+    resetProgress: 'Reset Progress',
+    resetProgressConfirm: 'Reset all progress for this set?',
 
     // Flashcard & Test
     dontKnow: "Don't know",
@@ -125,6 +127,8 @@ const translations = {
     wordLang: 'Мова слів',
     translationLang: 'Мова перекладу',
     autoplay: 'Автовимова',
+    resetProgress: 'Скинути прогрес',
+    resetProgressConfirm: 'Скинути весь прогрес для цього набору?',
 
     dontKnow: 'Не знаю',
     know: 'Знаю',
@@ -192,6 +196,8 @@ const translations = {
     wordLang: 'Язык слов',
     translationLang: 'Язык перевода',
     autoplay: 'Автопроизношение',
+    resetProgress: 'Сбросить прогресс',
+    resetProgressConfirm: 'Сбросить весь прогресс для этого набора?',
 
     dontKnow: 'Не знаю',
     know: 'Знаю',
@@ -259,6 +265,8 @@ const translations = {
     wordLang: 'Kelime dili',
     translationLang: 'Çeviri dili',
     autoplay: 'Otomatik telaffuz',
+    resetProgress: 'İlerlemeyi Sıfırla',
+    resetProgressConfirm: 'Bu setin tüm ilerlemesini sıfırlamak istediğinize emin misiniz?',
 
     dontKnow: 'Bilmiyorum',
     know: 'Biliyorum',

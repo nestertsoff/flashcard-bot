@@ -287,6 +287,15 @@ export default function SetDetailPage() {
             {shareError && <p className="error-msg">{shareError}</p>}
           </div>
 
+          <button className="btn btn-secondary btn-block" style={{ marginTop: 12 }} onClick={async () => {
+            if (!confirm(t.resetProgressConfirm)) return;
+            await api.resetProgress(id);
+            loadSet();
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            {t.resetProgress}
+          </button>
+
           <div className="card" style={{ cursor: 'default', marginTop: 16, borderColor: 'var(--danger)' }}>
             <p style={{ fontWeight: 700, marginBottom: 8, color: 'var(--danger)' }}>{t.delete}</p>
             <button className="btn btn-danger btn-block" onClick={handleDeleteSet}>
