@@ -24,6 +24,7 @@ export default function FlashcardPage() {
   const [done, setDone] = useState(false);
   const [sticker, setSticker] = useState(null);
   const [setData, setSetData] = useState(null);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
     api.getSet(id).then(s => { setSetData(s); setCards(sortCards(s.cards)); }).catch(() => navigate('/'));
@@ -31,15 +32,33 @@ export default function FlashcardPage() {
 
   // Autoplay front when card changes
   useEffect(() => {
-    if (cards.length > 0 && !done && !sticker && setData && getAutoplay()) {
+    if (started && cards.length > 0 && !done && !sticker && setData && getAutoplay()) {
       const card = cards[index];
       const frontText = direction === 'word' ? card.word : card.translations.join(', ');
       const frontL = direction === 'word' ? setData.lang : setData.translation_lang;
       speak(frontText, frontL);
     }
-  }, [index, cards, setData, done, sticker]);
+  }, [index, cards, setData, done, sticker, started]);
 
   if (cards.length === 0) return <div className="loader-wrap"><div className="loader"></div></div>;
+
+  if (!started) {
+    return (
+      <div className="container">
+        <div className="header">
+          <button className="btn btn-secondary btn-icon" onClick={() => navigate(`/sets/${id}`)} aria-label={t.back} title={t.back}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        </div>
+        <div className="counter">{cards.length} {t.cards}</div>
+        <div className="flashcard-container" onClick={() => setStarted(true)} style={{ cursor: 'pointer' }}>
+          <div className="flashcard-inner">
+            <div className="flashcard-front" style={{ fontSize: 36 }}>
+              {t.start}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (done) {
     const correct = results.filter(r => r.correct).length;
@@ -60,7 +79,7 @@ export default function FlashcardPage() {
           </div>
         ))}
         <div className="btn-row" style={{ marginTop: 20 }}>
-          <button className="btn btn-primary" onClick={() => { setIndex(0); setResults([]); setDone(false); setFlipped(false); setSticker(null); }}>{t.tryAgain}</button>
+          <button className="btn btn-primary" onClick={() => { setIndex(0); setResults([]); setDone(false); setFlipped(false); setSticker(null); setStarted(false); }}>{t.tryAgain}</button>
           <button className="btn btn-secondary" onClick={() => navigate(`/sets/${id}`)}>{t.back}</button>
         </div>
       </div>
@@ -103,8 +122,7 @@ export default function FlashcardPage() {
       {!sticker && (
         <>
           <div className={`flashcard-container ${flipped ? 'flipped' : ''}`} onClick={() => {
-            const next = !flipped;
-            setFlipped(next);
+            setFlipped(!flipped);
           }}>
             <div className="flashcard-inner">
               <div className="flashcard-front">

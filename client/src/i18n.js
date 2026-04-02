@@ -65,6 +65,7 @@ const translations = {
     results: 'Results',
     tryAgain: 'Try Again',
     next: 'Next',
+    start: 'Start',
 
     // Reactions
     perfect: 'Perfect!',
@@ -135,6 +136,7 @@ const translations = {
     results: 'Результати',
     tryAgain: 'Спробувати знову',
     next: 'Далі',
+    start: 'Почати',
 
     perfect: 'Чудово!',
     great: 'Молодець!',
@@ -204,6 +206,7 @@ const translations = {
     results: 'Результаты',
     tryAgain: 'Попробовать снова',
     next: 'Далее',
+    start: 'Начать',
 
     perfect: 'Отлично!',
     great: 'Молодец!',
@@ -273,6 +276,7 @@ const translations = {
     results: 'Sonuçlar',
     tryAgain: 'Tekrar Dene',
     next: 'Sonraki',
+    start: 'Başla',
 
     perfect: 'Mükemmel!',
     great: 'Harika!',
