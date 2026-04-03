@@ -92,6 +92,7 @@ export default function ReviewTestPage() {
   const question = direction === 'word' ? card.word : card.translations.join(', ');
   const correctAnswer = direction === 'word' ? card.translations.join(', ') : card.word;
   const questionLang = direction === 'word' ? card.lang : card.translation_lang;
+  const answerLang = direction === 'word' ? card.translation_lang : card.lang;
 
   async function handleAnswer(opt) {
     if (answered) return;
@@ -99,6 +100,7 @@ export default function ReviewTestPage() {
     setSelected(opt);
     const isCorrect = opt === correctAnswer;
     setSticker(isCorrect ? getCorrectSticker() : getWrongSticker());
+    if (getAutoplay()) speak(correctAnswer, answerLang);
     await api.updateProgress(card.id, isCorrect ? 'known' : 'learning');
     setResults([...results, { card, correct: isCorrect }]);
   }

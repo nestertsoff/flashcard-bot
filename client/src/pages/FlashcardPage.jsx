@@ -122,7 +122,9 @@ export default function FlashcardPage() {
       {!sticker && (
         <>
           <div className={`flashcard-container ${flipped ? 'flipped' : ''}`} onClick={() => {
-            setFlipped(!flipped);
+            const next = !flipped;
+            setFlipped(next);
+            if (next && getAutoplay() && setData) speak(back, backLang);
           }}>
             <div className="flashcard-inner">
               <div className="flashcard-front">

@@ -104,7 +104,11 @@ export default function ReviewFlashcardPage() {
       {sticker && (<div className="sticker-reaction"><img src={sticker} alt="" /></div>)}
       {!sticker && (
         <>
-          <div className={`flashcard-container ${flipped ? 'flipped' : ''}`} onClick={() => setFlipped(!flipped)}>
+          <div className={`flashcard-container ${flipped ? 'flipped' : ''}`} onClick={() => {
+            const next = !flipped;
+            setFlipped(next);
+            if (next && getAutoplay()) speak(back, backLang);
+          }}>
             <div className="flashcard-inner">
               <div className="flashcard-front">
                 <SpeakButton text={front} lang={frontLang} />

@@ -107,12 +107,15 @@ export default function TestPage() {
   const correctAnswer = direction === 'word' ? card.translations.join(', ') : card.word;
   const questionLang = direction === 'word' ? setData?.lang : setData?.translation_lang;
 
+  const answerLang = direction === 'word' ? setData?.translation_lang : setData?.lang;
+
   async function handleAnswer(opt) {
     if (answered) return;
     setAnswered(true);
     setSelected(opt);
     const isCorrect = opt === correctAnswer;
     setSticker(isCorrect ? getCorrectSticker() : getWrongSticker());
+    if (getAutoplay() && setData) speak(correctAnswer, answerLang);
     await api.updateProgress(card.id, isCorrect ? 'known' : 'learning');
     setResults([...results, { card, correct: isCorrect }]);
   }
