@@ -135,4 +135,15 @@ describe('sets API', () => {
     expect(imp.statusCode).toBe(200);
     expect(imp.json().title).toBe('Shared');
   });
+
+  it('returns review cards', async () => {
+    const { cookie } = await registerAndGetCookie('reviewuser', 'password123');
+    await server.inject({ method: 'POST', url: '/api/sets', headers: { cookie }, payload: { title: 'Review', cards: [{ word: 'hello', translations: ['привет'] }] } });
+    const res = await server.inject({ method: 'GET', url: '/api/review?limit=10', headers: { cookie } });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.cards).toHaveLength(1);
+    expect(body.cards[0].word).toBe('hello');
+    expect(body.cards[0].lang).toBe('en');
+  });
 });

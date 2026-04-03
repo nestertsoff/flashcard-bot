@@ -96,3 +96,52 @@ describe('progress', () => {
     expect(db.getSet(setId, uid).cards[0].mistakes).toBe(2);
   });
 });
+
+describe('review', () => {
+  it('returns cards sorted by score (mistakes * 2 + staleness)', () => {
+    const userId = db.createUser('reviewer', 'hash');
+    const setId = db.createSet(userId, 'Review Set', [
+      { word: 'a', translations: ['1'] },
+      { word: 'b', translations: ['2'] },
+      { word: 'c', translations: ['3'] },
+    ]);
+    const set = db.getSet(setId, userId);
+    // Mark 'a' as known — should be excluded
+    db.updateProgress(userId, set.cards[0].id, 'known');
+    // Mark 'b' as learning with mistakes
+    db.updateProgress(userId, set.cards[1].id, 'learning');
+    db.updateProgress(userId, set.cards[1].id, 'learning');
+    // 'c' stays new — no progress
+
+    const review = db.getReviewCards(userId, 10);
+    expect(review.length).toBe(2); // 'a' excluded (known)
+    expect(review.map(r => r.word)).toContain('b');
+    expect(review.map(r => r.word)).toContain('c');
+    // Each card has lang info
+    expect(review[0].lang).toBe('en');
+    expect(review[0].translation_lang).toBe('uk');
+  });
+
+  it('respects limit parameter', () => {
+    const userId = db.createUser('limiter', 'hash');
+    db.createSet(userId, 'Big Set', [
+      { word: 'w1', translations: ['t1'] },
+      { word: 'w2', translations: ['t2'] },
+      { word: 'w3', translations: ['t3'] },
+    ]);
+    const review = db.getReviewCards(userId, 2);
+    expect(review.length).toBe(2);
+  });
+
+  it('returns count of reviewable cards', () => {
+    const userId = db.createUser('counter', 'hash');
+    const setId = db.createSet(userId, 'Count Set', [
+      { word: 'x', translations: ['y'] },
+      { word: 'z', translations: ['w'] },
+    ]);
+    expect(db.getReviewCount(userId)).toBe(2);
+    const set = db.getSet(setId, userId);
+    db.updateProgress(userId, set.cards[0].id, 'known');
+    expect(db.getReviewCount(userId)).toBe(1);
+  });
+});
