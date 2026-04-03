@@ -161,6 +161,32 @@ export function createDb(dbPath) {
     `).run(userId, setId);
   }
 
+  function getReviewCards(userId, limit = 30) {
+    return sqlite.prepare(`
+      SELECT c.id, c.word, c.translations, s.lang, s.translation_lang,
+             COALESCE(p.status, 'new') as status,
+             COALESCE(p.mistakes, 0) as mistakes,
+             p.last_seen
+      FROM cards c
+      JOIN sets s ON s.id = c.set_id
+      LEFT JOIN progress p ON p.card_id = c.id AND p.user_id = ?
+      WHERE s.user_id = ? AND COALESCE(p.status, 'new') != 'known'
+      ORDER BY (COALESCE(p.mistakes, 0) * 2 + COALESCE(CAST((julianday('now') - julianday(p.last_seen)) AS INTEGER), 999)) DESC
+      LIMIT ?
+    `).all(userId, userId, limit).map(c => ({ ...c, translations: JSON.parse(c.translations) }));
+  }
+
+  function getReviewCount(userId) {
+    const row = sqlite.prepare(`
+      SELECT COUNT(*) as count
+      FROM cards c
+      JOIN sets s ON s.id = c.set_id
+      LEFT JOIN progress p ON p.card_id = c.id AND p.user_id = ?
+      WHERE s.user_id = ? AND COALESCE(p.status, 'new') != 'known'
+    `).get(userId, userId);
+    return row.count;
+  }
+
   function updateProgress(userId, cardId, status) {
     sqlite.prepare(`
       INSERT INTO progress (user_id, card_id, status, mistakes, last_seen)
@@ -181,6 +207,6 @@ export function createDb(dbPath) {
     createSet, listSets, getSet, updateSetTitle, deleteSet,
     addCard, deleteCard,
     generateShareCode, importByShareCode,
-    resetProgress, updateProgress, close,
+    resetProgress, getReviewCards, getReviewCount, updateProgress, close,
   };
 }

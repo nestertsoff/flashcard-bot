@@ -151,6 +151,17 @@ export function buildServer(db, jwtSecret) {
     return { ok: true };
   });
 
+  // --- REVIEW ---
+
+  app.get('/api/review', (req) => {
+    const limit = Math.min(Number(req.query.limit) || 30, 100);
+    return { cards: db.getReviewCards(req.user.id, limit) };
+  });
+
+  app.get('/api/review/count', (req) => {
+    return { count: db.getReviewCount(req.user.id) };
+  });
+
   // --- TTS ---
 
   const TTS_LANG_MAP = {
