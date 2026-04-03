@@ -4,6 +4,7 @@ import { useLang } from '../context/LangContext';
 import { api } from '../api';
 import { getAutoplay, setAutoplay as saveAutoplay } from '../tts';
 import SpeakButton from '../components/SpeakButton';
+import { timeAgo } from '../timeago';
 
 function parseBulkLines(text) {
   return text.split('\n').map((line, i) => {
@@ -21,7 +22,7 @@ function parseBulkLines(text) {
 export default function SetDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useLang();
+  const { t, lang: uiLang } = useLang();
   const [set, setSet] = useState(null);
   const [page, setPage] = useState('study');
   const [inputMode, setInputMode] = useState('single');
@@ -268,13 +269,17 @@ export default function SetDetailPage() {
             <>
               <h2 style={{ margin: '24px 0 12px' }}>{t.words} ({set.cards.length})</h2>
               {set.cards.map(c => (
-                <div key={c.id} className="word-item">
+                <div key={c.id} className={`word-item status-${c.status || 'new'}`}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, minWidth: 0 }}>
                     <SpeakButton text={c.word} lang={set.lang} size={16} />
                     <span className="word">{c.word}</span>
                     <span style={{ color: 'var(--text-secondary)', margin: '0 4px' }}>—</span>
                     <SpeakButton text={c.translations.join(', ')} lang={set.translation_lang} size={16} />
                     <span className="translation">{c.translations.join(', ')}</span>
+                  </div>
+                  <div className="word-meta">
+                    {c.status === 'learning' && <span className="mistakes">{c.mistakes}✗ · </span>}
+                    {c.last_seen ? timeAgo(c.last_seen, uiLang) : (t.new_word || t.new_)}
                   </div>
                   <button className="delete-btn" onClick={() => handleDeleteCard(c.id)} aria-label={t.delete}>×</button>
                 </div>
