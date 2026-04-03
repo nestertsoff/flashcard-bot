@@ -31,4 +31,6 @@ export const api = {
   importSet: (code) => request('POST', `/api/share/${code}`),
   resetProgress: (setId) => request('POST', `/api/sets/${setId}/reset-progress`),
   updateProgress: (cardId, status) => request('POST', '/api/progress', { cardId, status }),
+  getReview: (limit) => request('GET', `/api/review?limit=${limit || 30}`),
+  getReviewCount: () => request('GET', '/api/review/count'),
 };

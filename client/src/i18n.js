@@ -66,6 +66,11 @@ const translations = {
     tryAgain: 'Try Again',
     next: 'Next',
     start: 'Start',
+    review: 'Review',
+    wordsToReview: 'words to review',
+    reviewEmpty: 'All caught up! No words to review.',
+    wordsCount: 'Words',
+    new_word: 'new',
 
     // Reactions
     perfect: 'Perfect!',
@@ -137,6 +142,11 @@ const translations = {
     tryAgain: 'Спробувати знову',
     next: 'Далі',
     start: 'Почати',
+    review: 'Повторення',
+    wordsToReview: 'слів на повторення',
+    reviewEmpty: 'Все повторено! Немає слів для повторення.',
+    wordsCount: 'Слів',
+    new_word: 'нове',
 
     perfect: 'Чудово!',
     great: 'Молодець!',
@@ -207,6 +217,11 @@ const translations = {
     tryAgain: 'Попробовать снова',
     next: 'Далее',
     start: 'Начать',
+    review: 'Повторение',
+    wordsToReview: 'слов на повторение',
+    reviewEmpty: 'Всё повторено! Нет слов для повторения.',
+    wordsCount: 'Слов',
+    new_word: 'новое',
 
     perfect: 'Отлично!',
     great: 'Молодец!',
@@ -277,6 +292,11 @@ const translations = {
     tryAgain: 'Tekrar Dene',
     next: 'Sonraki',
     start: 'Başla',
+    review: 'Tekrar',
+    wordsToReview: 'tekrar edilecek kelime',
+    reviewEmpty: 'Hepsi tamam! Tekrar edilecek kelime yok.',
+    wordsCount: 'Kelime',
+    new_word: 'yeni',
 
     perfect: 'Mükemmel!',
     great: 'Harika!',
