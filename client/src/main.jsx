@@ -11,6 +11,9 @@ import SetDetailPage from './pages/SetDetailPage';
 import FlashcardPage from './pages/FlashcardPage';
 import TestPage from './pages/TestPage';
 import ShareImportPage from './pages/ShareImportPage';
+import ReviewPage from './pages/ReviewPage';
+import ReviewFlashcardPage from './pages/ReviewFlashcardPage';
+import ReviewTestPage from './pages/ReviewTestPage';
 import './index.css';
 
 function ProtectedRoute({ children }) {
@@ -36,6 +39,9 @@ function App() {
           <Route path="/sets/:id/flashcard" element={<ProtectedRoute><FlashcardPage /></ProtectedRoute>} />
           <Route path="/sets/:id/test" element={<ProtectedRoute><TestPage /></ProtectedRoute>} />
           <Route path="/share/:code" element={<ProtectedRoute><ShareImportPage /></ProtectedRoute>} />
+          <Route path="/review" element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
+          <Route path="/review/flashcard" element={<ProtectedRoute><ReviewFlashcardPage /></ProtectedRoute>} />
+          <Route path="/review/test" element={<ProtectedRoute><ReviewTestPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </AuthProvider>

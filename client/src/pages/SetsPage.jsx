@@ -11,6 +11,7 @@ export default function SetsPage() {
   const { t } = useLang();
   const navigate = useNavigate();
   const [sets, setSets] = useState([]);
+  const [reviewCount, setReviewCount] = useState(0);
   const [showImport, setShowImport] = useState(false);
   const [importCode, setImportCode] = useState('');
   const [importError, setImportError] = useState('');
@@ -24,6 +25,10 @@ export default function SetsPage() {
   async function loadSets() {
     const data = await api.getSets();
     setSets(data);
+    try {
+      const r = await api.getReviewCount();
+      setReviewCount(r.count);
+    } catch {}
   }
 
   async function handleCreate() {
@@ -94,6 +99,22 @@ export default function SetsPage() {
             {importError && <p className="error-msg">{importError}</p>}
             <button className="btn btn-primary btn-block" onClick={handleImport}>{t.import}</button>
           </div>
+        </div>
+      )}
+
+      {reviewCount > 0 && (
+        <div className="card" onClick={() => navigate('/review')} style={{
+          background: 'linear-gradient(145deg, var(--accent-light), var(--accent))',
+          marginBottom: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 16 }}>🔄 {t.review}</div>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 2 }}>{reviewCount} {t.wordsToReview}</div>
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)' }}>{reviewCount}</div>
         </div>
       )}
 
