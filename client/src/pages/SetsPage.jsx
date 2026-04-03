@@ -104,17 +104,20 @@ export default function SetsPage() {
 
       {reviewCount > 0 && (
         <div className="card" onClick={() => navigate('/review')} style={{
-          background: 'linear-gradient(145deg, var(--accent-light), var(--accent))',
           marginBottom: 16,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          borderColor: 'var(--primary)',
         }}>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 16 }}>🔄 {t.review}</div>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 2 }}>{reviewCount} {t.wordsToReview}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary-dark)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 15 }}>{t.review}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 1 }}>{reviewCount} {t.wordsToReview}</div>
+            </div>
           </div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)' }}>{reviewCount}</div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       )}
 

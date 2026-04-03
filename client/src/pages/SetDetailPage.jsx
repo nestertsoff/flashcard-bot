@@ -278,7 +278,7 @@ export default function SetDetailPage() {
                     <span className="translation">{c.translations.join(', ')}</span>
                   </div>
                   <div className="word-meta">
-                    {c.status === 'learning' && <span className="mistakes">{c.mistakes}✗ · </span>}
+                    {c.status === 'learning' && <span className="mistakes">{c.mistakes}× ·</span>}
                     {c.last_seen ? timeAgo(c.last_seen, uiLang) : (t.new_word || t.new_)}
                   </div>
                   <button className="delete-btn" onClick={() => handleDeleteCard(c.id)} aria-label={t.delete}>×</button>
