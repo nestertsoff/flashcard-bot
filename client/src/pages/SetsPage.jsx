@@ -5,6 +5,7 @@ import { useLang } from '../context/LangContext';
 import { api } from '../api';
 import { TTS_LANGUAGES } from '../tts';
 import SettingsDropdown from '../components/SettingsDropdown';
+import { prefetchSetAudio } from '../prefetch';
 
 export default function SetsPage() {
   const { logout } = useAuth();
@@ -19,6 +20,7 @@ export default function SetsPage() {
   const [newTitle, setNewTitle] = useState('');
   const [newLang, setNewLang] = useState('en');
   const [newTransLang, setNewTransLang] = useState('uk');
+  const [prefetchStatuses, setPrefetchStatuses] = useState({});
 
   useEffect(() => { loadSets(); }, []);
 
@@ -29,6 +31,23 @@ export default function SetsPage() {
       const r = await api.getReviewCount();
       setReviewCount(r.count);
     } catch {}
+    prefetchAllSets(data);
+  }
+
+  async function prefetchAllSets(setsData) {
+    for (const s of setsData) {
+      if (s.card_count === 0) continue;
+      try {
+        const fullSet = await api.getSet(s.id);
+        setPrefetchStatuses(prev => ({ ...prev, [s.id]: 'loading' }));
+        await prefetchSetAudio(fullSet, ({ total, loaded }) => {
+          if (loaded >= total) {
+            setPrefetchStatuses(prev => ({ ...prev, [s.id]: 'done' }));
+            setTimeout(() => setPrefetchStatuses(prev => ({ ...prev, [s.id]: null })), 2000);
+          }
+        });
+      } catch {}
+    }
   }
 
   async function handleCreate() {
@@ -132,7 +151,15 @@ export default function SetsPage() {
         <div key={s.id} className="card" onClick={() => navigate(`/sets/${s.id}`)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <strong>{s.title}</strong>
-            <span className="stats">{s.card_count} {t.cards}</span>
+            <span className="stats" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {s.card_count} {t.cards}
+              {prefetchStatuses[s.id] === 'loading' && <span className="prefetch-spinner" />}
+              {prefetchStatuses[s.id] === 'done' && (
+                <span className="prefetch-done">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+              )}
+            </span>
           </div>
           {s.card_count > 0 && (
             <div className="progress-bar">

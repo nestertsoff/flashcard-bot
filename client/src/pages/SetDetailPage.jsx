@@ -5,6 +5,7 @@ import { api } from '../api';
 import { getAutoplay, setAutoplay as saveAutoplay } from '../tts';
 import SpeakButton from '../components/SpeakButton';
 import { timeAgo } from '../timeago';
+import { prefetchSetAudio } from '../prefetch';
 
 function parseBulkLines(text) {
   return text.split('\n').map((line, i) => {
@@ -36,6 +37,7 @@ export default function SetDetailPage() {
   const [autoplay, setAutoplayState] = useState(getAutoplay);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
+  const [prefetchStatus, setPrefetchStatus] = useState(null);
 
   useEffect(() => { loadSet(); }, [id]);
 
@@ -43,6 +45,13 @@ export default function SetDetailPage() {
     try {
       const data = await api.getSet(id);
       setSet(data);
+      setPrefetchStatus('loading');
+      prefetchSetAudio(data, ({ total, loaded }) => {
+        if (loaded >= total) {
+          setPrefetchStatus('done');
+          setTimeout(() => setPrefetchStatus(null), 2000);
+        }
+      }).catch(() => setPrefetchStatus(null));
     } catch { navigate('/'); }
   }
 
@@ -143,7 +152,14 @@ export default function SetDetailPage() {
         ) : (
           <h1 style={{ fontSize: 20, margin: 0, cursor: 'pointer' }} onClick={() => { setTitleDraft(set.title); setEditingTitle(true); }}>{set.title}</h1>
         )}
-        <div style={{ width: 36 }} />
+        <div style={{ width: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {prefetchStatus === 'loading' && <div className="prefetch-spinner" />}
+          {prefetchStatus === 'done' && (
+            <span className="prefetch-done">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Progress — always visible */}

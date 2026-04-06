@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import { api } from '../api';
+import { prefetchReviewAudio } from '../prefetch';
 
 const LIMIT_OPTIONS = [10, 20, 30, 50];
 
@@ -19,9 +20,21 @@ export default function ReviewPage() {
   const [cards, setCards] = useState(null);
   const [limit, setLimit] = useState(getReviewLimit);
   const [direction, setDirection] = useState('word');
+  const [prefetchStatus, setPrefetchStatus] = useState(null);
 
   useEffect(() => {
-    api.getReview(limit).then(data => setCards(data.cards)).catch(() => navigate('/'));
+    api.getReview(limit).then(data => {
+      setCards(data.cards);
+      if (data.cards.length > 0) {
+        setPrefetchStatus('loading');
+        prefetchReviewAudio(data.cards, ({ total, loaded }) => {
+          if (loaded >= total) {
+            setPrefetchStatus('done');
+            setTimeout(() => setPrefetchStatus(null), 2000);
+          }
+        }).catch(() => setPrefetchStatus(null));
+      }
+    }).catch(() => navigate('/'));
   }, [limit]);
 
   if (cards === null) return <div className="loader-wrap"><div className="loader"></div></div>;
@@ -51,7 +64,14 @@ export default function ReviewPage() {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <h1 style={{ fontSize: 20, margin: 0 }}>{t.review}</h1>
-        <div style={{ width: 44 }} />
+        <div style={{ width: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {prefetchStatus === 'loading' && <div className="prefetch-spinner" />}
+          {prefetchStatus === 'done' && (
+            <span className="prefetch-done">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+          )}
+        </div>
       </div>
 
       <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: 16 }}>
