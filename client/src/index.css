@@ -403,6 +403,15 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3Csv
 .speak-btn:hover { background: var(--primary-light); color: var(--primary-dark); }
 .speak-btn:active { transform: scale(0.9); }
 
+/* Prefetch indicator */
+.prefetch-indicator { display: inline-flex; align-items: center; margin-left: 8px; }
+.prefetch-spinner {
+  width: 14px; height: 14px;
+  border: 2px solid var(--border); border-top-color: var(--primary-dark);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+.prefetch-done { color: var(--success); animation: fadeIn 0.3s ease; }
+
 /* Autoplay toggle */
 .toggle-row {
   display: flex; align-items: center; justify-content: space-between;
