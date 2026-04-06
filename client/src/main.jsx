@@ -60,4 +60,12 @@ createRoot(document.getElementById('root')).render(
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
+  // When SW takes control for first time, reload to ensure all fetches go through it
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
 }

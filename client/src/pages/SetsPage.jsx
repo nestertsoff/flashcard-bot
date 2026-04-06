@@ -25,13 +25,15 @@ export default function SetsPage() {
   useEffect(() => { loadSets(); }, []);
 
   async function loadSets() {
-    const data = await api.getSets();
-    setSets(data);
     try {
-      const r = await api.getReviewCount();
-      setReviewCount(r.count);
+      const data = await api.getSets();
+      setSets(data);
+      try {
+        const r = await api.getReviewCount();
+        setReviewCount(r.count);
+      } catch {}
+      prefetchAllSets(data);
     } catch {}
-    prefetchAllSets(data);
   }
 
   async function prefetchAllSets(setsData) {
