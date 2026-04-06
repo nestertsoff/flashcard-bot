@@ -6,10 +6,12 @@ import { api } from '../api';
 import { TTS_LANGUAGES } from '../tts';
 import SettingsDropdown from '../components/SettingsDropdown';
 import { prefetchSetAudio } from '../prefetch';
+import { useOnline } from '../hooks/useOnline';
 
 export default function SetsPage() {
   const { logout } = useAuth();
   const { t } = useLang();
+  const online = useOnline();
   const navigate = useNavigate();
   const [sets, setSets] = useState([]);
   const [reviewCount, setReviewCount] = useState(0);
@@ -77,10 +79,12 @@ export default function SetsPage() {
         <SettingsDropdown onLogout={logout} />
       </div>
 
-      <div className="btn-row">
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t.newSet}</button>
-        <button className="btn btn-secondary" onClick={() => setShowImport(true)}>{t.import}</button>
-      </div>
+      {online && (
+        <div className="btn-row">
+          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t.newSet}</button>
+          <button className="btn btn-secondary" onClick={() => setShowImport(true)}>{t.import}</button>
+        </div>
+      )}
 
       {showCreate && (
         <div className="modal-overlay" onClick={() => setShowCreate(false)}>

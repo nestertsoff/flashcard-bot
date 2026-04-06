@@ -6,6 +6,7 @@ import { getAutoplay, setAutoplay as saveAutoplay } from '../tts';
 import SpeakButton from '../components/SpeakButton';
 import { timeAgo } from '../timeago';
 import { prefetchSetAudio } from '../prefetch';
+import { useOnline } from '../hooks/useOnline';
 
 function parseBulkLines(text) {
   return text.split('\n').map((line, i) => {
@@ -24,6 +25,7 @@ export default function SetDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, lang: uiLang } = useLang();
+  const online = useOnline();
   const [set, setSet] = useState(null);
   const [page, setPage] = useState('study');
   const [inputMode, setInputMode] = useState('single');
@@ -150,7 +152,7 @@ export default function SetDetailPage() {
             style={{ fontSize: 18, fontWeight: 800, textAlign: 'center', padding: '4px 8px', flex: 1, minWidth: 0 }}
           />
         ) : (
-          <h1 style={{ fontSize: 20, margin: 0, cursor: 'pointer' }} onClick={() => { setTitleDraft(set.title); setEditingTitle(true); }}>{set.title}</h1>
+          <h1 style={{ fontSize: 20, margin: 0, cursor: online ? 'pointer' : 'default' }} onClick={() => { if (online) { setTitleDraft(set.title); setEditingTitle(true); } }}>{set.title}</h1>
         )}
         <div style={{ width: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {prefetchStatus === 'loading' && <div className="prefetch-spinner" />}
@@ -233,6 +235,7 @@ export default function SetDetailPage() {
       {/* ===== WORDS TAB ===== */}
       {page === 'words' && (
         <div style={{ animation: 'fadeIn 0.2s ease' }}>
+          {online && (<>
           <h2 style={{ marginBottom: 12 }}>{t.addWords}</h2>
           <div className="tabs" style={{ marginBottom: 16 }}>
             <div className={`tab ${inputMode === 'single' ? 'active' : ''}`} onClick={() => setInputMode('single')}>{t.single}</div>
@@ -281,6 +284,7 @@ export default function SetDetailPage() {
             </div>
           )}
 
+          </>)}
           {set.cards.length > 0 && (
             <>
               <h2 style={{ margin: '24px 0 12px' }}>{t.words} ({set.cards.length})</h2>
@@ -297,7 +301,7 @@ export default function SetDetailPage() {
                     {c.status === 'learning' && <span className="mistakes">{c.mistakes}× ·</span>}
                     {c.last_seen ? timeAgo(c.last_seen, uiLang) : (t.new_word || t.new_)}
                   </div>
-                  <button className="delete-btn" onClick={() => handleDeleteCard(c.id)} aria-label={t.delete}>×</button>
+                  {online && <button className="delete-btn" onClick={() => handleDeleteCard(c.id)} aria-label={t.delete}>×</button>}
                 </div>
               ))}
             </>
@@ -314,6 +318,7 @@ export default function SetDetailPage() {
               onClick={() => { const v = !autoplay; setAutoplayState(v); saveAutoplay(v); }} />
           </div>
 
+          {online && (<>
           <div className="card" style={{ cursor: 'default' }}>
             <button className={`btn ${copied ? 'btn-success' : 'btn-secondary'} btn-block`} onClick={handleCopyLink}>
               {copied ? (
@@ -345,6 +350,7 @@ export default function SetDetailPage() {
               {t.delete}
             </button>
           </div>
+          </>)}
         </div>
       )}
     </div>
